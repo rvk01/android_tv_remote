@@ -708,19 +708,14 @@ class myhandler(BaseHTTPRequestHandler):
         response = 'Ok... ' + data
 
         if 'KEYCODE_'+data in globals() or data=='STOP':
-
             if not self.server.t1.is_alive() and not data=='STOP':
                 log.info('Remote was stopped and we now have a code (%s), so restarting REMOTE thread' % data)
                 self.server.t1 = None
                 self.server.t1 = threading.Thread(target=remote, args=())
                 self.server.t1.start()
-
             if self.server.t1.is_alive(): queue.put(data)
-
         else:
-
             response = 'Wrong... ' + data
-
 
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
@@ -737,7 +732,7 @@ def server():
     srv = http_server(t1)
 
 def getdeviceip(want_usn):
-    devices = discover(1.0,1,want_usn)
+    devices = discover(5.0,1,want_usn)
     if len(devices) == 0: return (None, None)
     for location, usn in devices:
         o = urllib.parse.urlsplit(location)
@@ -754,7 +749,7 @@ if __name__ == "__main__":
     if not os.path.isfile(DEVICE_FILE):
         print("Android TV Remote - Choosing device - (collecting...)")
         print()
-        devices = discover(2.0,1)
+        devices = discover(5.0,1)
         #for device, usn in devices:
         idx=0
         devices=list(devices)
@@ -771,6 +766,9 @@ if __name__ == "__main__":
                 x = input("Enter which device you want to use: ")
                 usn=devices[int(x)-1][1]
                 break
+            except KeyboardInterrupt:
+                print()
+                sys.exit()
             except:
                 print('Try again')
         with open(DEVICE_FILE, "wt") as f: f.write(usn)
