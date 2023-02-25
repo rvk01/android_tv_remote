@@ -21,7 +21,7 @@ __license__ = "GPLv3"
 __deprecated__ = False
 __status__ = "Development"
 __date__ = "2023-02-24"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # ----------------------------------------------
 #
@@ -53,7 +53,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # ----------------------------------------------
 # Certificate automatically in same directory as script
 # ----------------------------------------------
-CERT_FILE=dir_path + "/client.pem" # ook het Path gebruikt, zodat duidelijk is waar dit bestand staat
+CERT_FILE=dir_path + "/client.pem"
+DEVICE_FILE=dir_path + "/server.txt"
 
 SERVER_IP = '1.1.1.1'
 
@@ -374,13 +375,13 @@ KEYCODE_DEMO_APP_2 = 302;
 KEYCODE_DEMO_APP_3 = 303;
 KEYCODE_DEMO_APP_4 = 304;
 
-def discover(timeout=1.0, retries=1):
+def discover(timeout=1.0, retries=1, want_usn=None):
     locations = []
     group = ('239.255.255.250', 1900)
     service = 'urn:dial-multiscreen-org:service:dial:1'
+    #service = 'ssdp:all'
     message = '\r\n'.join(['M-SEARCH * HTTP/1.1', 'HOST: {group[0]}:{group[1]}',
         'MAN: "ssdp:discover"', 'ST: {st}', 'MX: 3', '', '']).format(group=group, st=service)
-    #print(message)
     socket.setdefaulttimeout(timeout)
     for _ in range(retries):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -390,15 +391,19 @@ def discover(timeout=1.0, retries=1):
         while True:
             try:
                 response = sock.recv(2048).decode('utf-8')
+                location=None
+                usn=None
                 for line in response.split('\r\n'):
-                    if line.startswith('LOCATION: '):
-                        location = line.split(' ')[1].strip()
-                        if not location in locations:
-                            locations.append(location)
+                    if line.startswith('LOCATION: '): location = line.split(' ')[1].strip()
+                    if line.startswith('USN: '): usn = line.split(' ')[1].strip()
+                usn = usn.split(':')[1].strip()
+                if not location is None and (want_usn is None or want_usn==usn):
+                    locations.append((location,usn))
+                    if want_usn==usn: break
             except socket.timeout:
                 break
-    return locations
-
+    locations = set({i: j for i,j in reversed(locations)}.items())
+    return  locations
 
 # ----------------------------------------------
 #
@@ -731,43 +736,59 @@ def server():
     # t1.start() # no need to start here. Just start when needed the first time
     srv = http_server(t1)
 
-def getdeviceip():
-    devices = discover()
-    for device in devices:
-        r = requests.get(device)
-
-        # dom = etree.fromstring(r.text)
-        # Remove namespace prefixes
-        # for elem in dom.getiterator(): elem.tag = elem.xpath('local-name()')
-        # x = dom.xpath('/root/device/modelName/text()')
-
-        o = urllib.parse.urlsplit(device)
+def getdeviceip(want_usn):
+    devices = discover(1.0,1,want_usn)
+    if len(devices) == 0: return (None, None)
+    for location, usn in devices:
+        o = urllib.parse.urlsplit(location)
+        r = requests.get(location)
         d = SimpleXMLElement(r.text)
-        x = str(next(d.modelName()))
-
-        return(o.hostname, x)  # print(x[0])
+        x = str(next(d.friendlyName()))
+        return(o.hostname, x)
 
 # ----------------------------------------------
 #
 # ----------------------------------------------
 if __name__ == "__main__":
 
-    SERVER_IP, MODELNAME = getdeviceip()
+    if not os.path.isfile(DEVICE_FILE):
+        print("Android TV Remote - Choosing device - (collecting...)")
+        print()
+        devices = discover(2.0,1)
+        #for device, usn in devices:
+        idx=0
+        devices=list(devices)
+        for location, usn in devices:
+             idx+=1
+             o = urllib.parse.urlsplit(location)
+             r = requests.get(location)
+             d = SimpleXMLElement(r.text)
+             x = str(next(d.friendlyName()))
+             print('{0:>2}) {1: <16} {2: <40} {3}'.format(idx,o.hostname, x, usn))
+        print()
+        while True:
+            try:
+                x = input("Enter which device you want to use: ")
+                usn=devices[int(x)-1][1]
+                break
+            except:
+                print('Try again')
+        with open(DEVICE_FILE, "wt") as f: f.write(usn)
+        print()
+
+    with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
+    SERVER_IP, MODELNAME = getdeviceip(usn)
     log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
-    # x = input("Enter two values: ").split()
 
     # We always need a certificate, create one if it does not exists
     if not os.path.isfile(CERT_FILE):
         log.info("Generating certificate")
         cert, key = generate_selfsigned_cert("atvremote")
         with open(CERT_FILE, "wt") as f: f.write(cert.decode("utf-8") + key.decode("utf-8"))
-
         # make initial contact to set host/ip via discovery and pair the remote
 
     try:
-
         server()
-
     except KeyboardInterrupt:
         log.error("Keyboard interrupt " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     except Exception as x:
