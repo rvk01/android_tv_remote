@@ -34,6 +34,10 @@ import select, socket, ssl
 import threading
 import queue
 import hashlib
+import requests
+import urllib.parse
+#from lxml import etree
+from pysimplesoap.simplexml import SimpleXMLElement
 from OpenSSL.crypto import load_certificate
 from OpenSSL.crypto import FILETYPE_PEM
 from asn1crypto.x509 import Certificate
@@ -46,14 +50,12 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 # ----------------------------------------------
 # Certificate automatically in same directory as script
 # ----------------------------------------------
 CERT_FILE=dir_path + "/client.pem" # ook het Path gebruikt, zodat duidelijk is waar dit bestand staat
 
-#SERVER_IP = '192.168.178.50'
-SERVER_IP = '192.168.2.4'
+SERVER_IP = '1.1.1.1'
 
 
 # ----------------------------------------------
@@ -372,6 +374,32 @@ KEYCODE_DEMO_APP_2 = 302;
 KEYCODE_DEMO_APP_3 = 303;
 KEYCODE_DEMO_APP_4 = 304;
 
+def discover(timeout=1.0, retries=1):
+    locations = []
+    group = ('239.255.255.250', 1900)
+    service = 'urn:dial-multiscreen-org:service:dial:1'
+    message = '\r\n'.join(['M-SEARCH * HTTP/1.1', 'HOST: {group[0]}:{group[1]}',
+        'MAN: "ssdp:discover"', 'ST: {st}', 'MX: 3', '', '']).format(group=group, st=service)
+    #print(message)
+    socket.setdefaulttimeout(timeout)
+    for _ in range(retries):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+        sock.sendto(message.encode('utf-8'), group)
+        while True:
+            try:
+                response = sock.recv(2048).decode('utf-8')
+                for line in response.split('\r\n'):
+                    if line.startswith('LOCATION: '):
+                        location = line.split(' ')[1].strip()
+                        if not location in locations:
+                            locations.append(location)
+            except socket.timeout:
+                break
+    return locations
+
+
 # ----------------------------------------------
 #
 # ----------------------------------------------
@@ -571,10 +599,11 @@ class AndroidRemote:
             # we receive commands via queue, execute them
             if not queue.empty():
               data = queue.get()
-              self.dostring(data)
+              if data=='STOP':
+                  # test exception to see if thread can restart itself
+                  raise Exception("Test exception")
+              self.dostring('KEYCODE_' + data)
 
-            # test exception to see if thread can restart itself
-            # raise Exception("Test exception")
 
             socket_list = [self.ssl_sock]
             read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], 0)
@@ -616,8 +645,9 @@ class AndroidRemote:
         self.send_message(message)
 
     def dostring(self, cmd):
-        log.info('Send %s' % cmd)
+        if not cmd in globals(): return
         i=globals()[cmd]
+        log.info('Send %s' % cmd)
 
         if not i in [KEYCODE_CHANNEL_UP, KEYCODE_CHANNEL_DOWN]:
             # keycodes
@@ -670,17 +700,22 @@ class http_server:
 class myhandler(BaseHTTPRequestHandler):
     def do_GET(self):
         data=self.path[1:].upper() # /Volume_up remove slash
-        response = 'Wrong... ' + data
-        if 'KEYCODE_' + data in globals():
-            cmd=globals()['KEYCODE_' + data]
-            response = 'Ok... ' + data + ' ' + str(cmd)
-            queue.put('KEYCODE_' + data)
+        response = 'Ok... ' + data
 
-            if not self.server.t1.is_alive() and not queue.empty():
-                log.info('Remote was stopped and we now have a code, so restarting REMOTE thread')
+        if 'KEYCODE_'+data in globals() or data=='STOP':
+
+            if not self.server.t1.is_alive() and not data=='STOP':
+                log.info('Remote was stopped and we now have a code (%s), so restarting REMOTE thread' % data)
                 self.server.t1 = None
                 self.server.t1 = threading.Thread(target=remote, args=())
                 self.server.t1.start()
+
+            if self.server.t1.is_alive(): queue.put(data)
+
+        else:
+
+            response = 'Wrong... ' + data
+
 
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
@@ -696,10 +731,30 @@ def server():
     # t1.start() # no need to start here. Just start when needed the first time
     srv = http_server(t1)
 
+def getdeviceip():
+    devices = discover()
+    for device in devices:
+        r = requests.get(device)
+
+        # dom = etree.fromstring(r.text)
+        # Remove namespace prefixes
+        # for elem in dom.getiterator(): elem.tag = elem.xpath('local-name()')
+        # x = dom.xpath('/root/device/modelName/text()')
+
+        o = urllib.parse.urlsplit(device)
+        d = SimpleXMLElement(r.text)
+        x = str(next(d.modelName()))
+
+        return(o.hostname, x)  # print(x[0])
+
 # ----------------------------------------------
 #
 # ----------------------------------------------
 if __name__ == "__main__":
+
+    SERVER_IP, MODELNAME = getdeviceip()
+    log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
+    # x = input("Enter two values: ").split()
 
     # We always need a certificate, create one if it does not exists
     if not os.path.isfile(CERT_FILE):
