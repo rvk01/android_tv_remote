@@ -55,8 +55,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 # ----------------------------------------------
 CERT_FILE=dir_path + "/client.pem"
 DEVICE_FILE=dir_path + "/server.txt"
-
-SERVER_IP = '1.1.1.1'
+INDEX_FILE=dir_path + "/index.html"
 
 
 # ----------------------------------------------
@@ -405,6 +404,16 @@ def discover(timeout=1.0, retries=1, want_usn=None):
     locations = set({i: j for i,j in reversed(locations)}.items())
     return  locations
 
+def getdeviceip(want_usn):
+    devices = discover(5.0,1,want_usn)
+    if len(devices) == 0: return (None, None)
+    for location, usn in devices:
+        o = urllib.parse.urlsplit(location)
+        r = requests.get(location)
+        d = SimpleXMLElement(r.text)
+        x = str(next(d.friendlyName()))
+        return(o.hostname, x)
+
 # ----------------------------------------------
 #
 # ----------------------------------------------
@@ -670,6 +679,10 @@ queue = queue.Queue()
 # Thread function for starting REMOTE
 # ----------------------------------------------
 def remote():
+
+    with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
+    SERVER_IP, MODELNAME = getdeviceip(usn)
+
     ar = AndroidRemote(SERVER_IP)
     try:
         ar.connect()
@@ -680,7 +693,8 @@ def remote():
         ar.disconnect()
         ar.connect(pairing=True)
         if not ar.start_pairing(): sys.exit()
-    log.info("Starting REMOTE")
+
+    log.info("Starting REMOTE with device %s on %s" % (MODELNAME, SERVER_IP))
 
     # main loop with PING/PONG and remote control
     try:
@@ -716,9 +730,13 @@ class myhandler(BaseHTTPRequestHandler):
             if self.server.t1.is_alive(): queue.put(data)
         else:
             response = 'Wrong... ' + data
+        if data=='INDEX' and os.path.isfile(INDEX_FILE):
+            with open(INDEX_FILE, 'rt') as fp: response=fp.read()
+
 
         self.send_response(200)
-        self.send_header('Content-type', 'text/plain')
+        self.send_header('Content-type', 'text/html')
+        self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Content-length', len(response))
         self.end_headers()
         self.wfile.write(bytes(response, 'UTF-8'))
@@ -730,16 +748,6 @@ def server():
     t1 = threading.Thread(target=remote, args=())
     # t1.start() # no need to start here. Just start when needed the first time
     srv = http_server(t1)
-
-def getdeviceip(want_usn):
-    devices = discover(5.0,1,want_usn)
-    if len(devices) == 0: return (None, None)
-    for location, usn in devices:
-        o = urllib.parse.urlsplit(location)
-        r = requests.get(location)
-        d = SimpleXMLElement(r.text)
-        x = str(next(d.friendlyName()))
-        return(o.hostname, x)
 
 # ----------------------------------------------
 #
@@ -775,8 +783,9 @@ if __name__ == "__main__":
         print()
 
     with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
-    SERVER_IP, MODELNAME = getdeviceip(usn)
-    log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
+    #SERVER_IP, MODELNAME = getdeviceip(usn)
+    log.info('We are using device "%s"' % usn)
+    #log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
 
     # We always need a certificate, create one if it does not exists
     if not os.path.isfile(CERT_FILE):

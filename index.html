@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Android TV Remote</title>
+<style>
+button {
+    color: #ffffff;
+    background-color: #2d63c8;
+    font-size: 19px;
+    border: 4px solid #2d63c8;
+    border-radius: 10px;
+    padding: 15px 50px;
+    cursor: pointer
+}
+button:hover {
+    color: #2d63c8;
+    background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+<script>
+function doCommand(cmd) {
+  fetch("/" + cmd)
+  .then(response => response.text())
+  .then((response) => {
+  document.getElementById("spanId").innerText = response;
+  })
+}
+</script>
+    <button type="button" name="myButton" onclick="doCommand('volume_down')">Vol -</button>
+    <button type="button" name="myButton" onclick="doCommand('volume_up')">Vol +</button>
+    <button type="button" name="myButton" onclick="doCommand('mute')">Mute</button>
+  <p>
+    <button type="button" name="myButton" onclick="doCommand('channel_down')">CH -</button>
+    <button type="button" name="myButton" onclick="doCommand('channel_up')">Ch +</button>
+  <p>
+    <button type="button" name="myButton" onclick="">&nbsp;</button>
+    <button type="button" name="myButton" onclick="doCommand('dpad_up')">^</button>
+    <button type="button" name="myButton" onclick="">&nbsp;</button>
+  <p>
+    <button type="button" name="myButton" onclick="doCommand('dpad_left')">&lt;</button>
+    <button type="button" name="myButton" onclick="">&nbsp;</button>
+    <button type="button" name="myButton" onclick="doCommand('dpad_right')">&gt;</button>
+  <p>
+    <button type="button" name="myButton" onclick="">&nbsp;</button>
+    <button type="button" name="myButton" onclick="doCommand('dpad_down')">V</button>
+    <button type="button" name="myButton" onclick="">&nbsp;</button>
+  <p>
+    <button type="button" name="myButton" onclick="doCommand('stop')">Stop</button>
+  <p>
+<div>
+  Result: <span id="spanId"></span>
+</div>
+</body>
+</html>
