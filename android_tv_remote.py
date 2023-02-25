@@ -56,7 +56,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 CERT_FILE=dir_path + "/client.pem"
 DEVICE_FILE=dir_path + "/server.txt"
 INDEX_FILE=dir_path + "/index.html"
-
+INDEX_FILE1=dir_path + "/index1.html"
+INDEX_FILE2=dir_path + "/index2.html"
+INDEX_FILE3=dir_path + "/index3.html"
 
 # ----------------------------------------------
 #
@@ -730,9 +732,9 @@ class myhandler(BaseHTTPRequestHandler):
             if self.server.t1.is_alive(): queue.put(data)
         else:
             response = 'Wrong... ' + data
-        if data=='INDEX' and os.path.isfile(INDEX_FILE):
-            with open(INDEX_FILE, 'rt') as fp: response=fp.read()
 
+        if os.path.isfile(dir_path+'/'+data.lower()+'.html'):
+            with open(dir_path+'/'+data.lower()+'.html', 'rt') as fp: response=fp.read()
 
         self.send_response(200)
         self.send_header('Content-type', 'text/html')

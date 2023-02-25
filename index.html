@@ -2,6 +2,29 @@
 <html>
 <head>
 <title>Android TV Remote</title>
+
+  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Expires" content="Tue, 01 Jan 1995 12:12:12 GMT">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
+  <meta http-equiv="Cache-Control" content="max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta name="robots" content="noindex">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <link rel="icon" sizes="192x192" href="android-chrome-192x192.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Forums">
+  <meta name="theme-color" content="#0071bc" />
+
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
 <style>
 button {
     color: #ffffff;
@@ -28,9 +51,9 @@ function doCommand(cmd) {
   })
 }
 </script>
-    <button type="button" name="myButton" onclick="doCommand('volume_down')">Vol -</button>
-    <button type="button" name="myButton" onclick="doCommand('volume_up')">Vol +</button>
-    <button type="button" name="myButton" onclick="doCommand('mute')">Mute</button>
+    <button type="button" name="myButton" onclick="doCommand('volume_down')">V-</button>
+    <button type="button" name="myButton" onclick="doCommand('volume_up')">V+</button>
+    <button type="button" name="myButton" onclick="doCommand('mute')"><small>Mute</small></button>
   <p>
     <button type="button" name="myButton" onclick="doCommand('channel_down')">CH -</button>
     <button type="button" name="myButton" onclick="doCommand('channel_up')">Ch +</button>
@@ -40,12 +63,16 @@ function doCommand(cmd) {
     <button type="button" name="myButton" onclick="">&nbsp;</button>
   <p>
     <button type="button" name="myButton" onclick="doCommand('dpad_left')">&lt;</button>
-    <button type="button" name="myButton" onclick="">&nbsp;</button>
+    <button type="button" name="myButton" onclick="doCommand('dpad_center')">&nbsp;</button>
     <button type="button" name="myButton" onclick="doCommand('dpad_right')">&gt;</button>
   <p>
     <button type="button" name="myButton" onclick="">&nbsp;</button>
     <button type="button" name="myButton" onclick="doCommand('dpad_down')">V</button>
     <button type="button" name="myButton" onclick="">&nbsp;</button>
+  <p>
+    <button type="button" name="myButton" onclick="doCommand('back')">&lt;--</button>
+    <button type="button" name="myButton" onclick="">V</button>
+    <button type="button" name="myButton" onclick="doCommand('home')">Home</button>
   <p>
     <button type="button" name="myButton" onclick="doCommand('stop')">Stop</button>
   <p>

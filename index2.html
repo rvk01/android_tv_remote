@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Android TV Remote</title>
+
+  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Expires" content="Tue, 01 Jan 1995 12:12:12 GMT">
+  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
+  <meta http-equiv="Cache-Control" content="max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta name="robots" content="noindex">
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <link rel="icon" sizes="192x192" href="android-chrome-192x192.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Forums">
+  <meta name="theme-color" content="#0071bc" />
+
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: 'Lato', sans-serif;
+    text-align: center;
+    background-color: #455a64;
+}
+h1 {
+    color: white;
+    font-size: 3em;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+}
+
+button {
+    display: block;
+    border-radius: 100%; 
+    border: none;
+    outline: none;
+    margin: 32px;
+    padding: 32px;
+    background-color: #03a9f4;
+    box-shadow: 3px 3px 7px #333;
+    
+    &:active {
+        box-shadow: none;
+    }
+}
+
+svg {
+    fill: white;
+    width: 64px;
+    height: 64px;
+}
+
+section {
+    display: inline-block;
+}
+
+.remote-buttons {
+    position: relative;
+}
+
+.vol-section {
+    &:after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #517e8b;
+        width: 4px;
+        height: 65%;
+        box-shadow: 2px 2px 7px #333;
+        //border-radius: 25px;
+    }
+}
+
+.remote {
+    display: inline-block;
+    padding: 32px 0;
+}
+
+.power {
+    background-color: #ff1538;
+}
+
+.source {
+    background-color: #ff8f01;
+}
+</style>
+</head>
+
+<body>
+<div class="remote">
+ <h1>TV Remote</h1>
+ <div class="remote-buttons">
+  <section>
+   <button id="power" class="power">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     viewBox="0 0 22.1 22.1" style="enable-background:new 0 0 22.1 22.1;" xml:space="preserve">
+<path d="M11.1,22.1C11.1,22.1,11.1,22.1,11.1,22.1c-2.7,0-5.2-1-7.1-2.9C0.1,15.2,0.1,8.9,4,5c0.4-0.4,1-0.4,1.4,0
+    c0.4,0.4,0.4,1,0,1.4c-3.1,3.1-3.1,8.2,0,11.3c1.5,1.5,3.5,2.3,5.7,2.3c0,0,0,0,0,0c2.1,0,4.1-0.8,5.7-2.3c3.1-3.1,3.1-8.2,0-11.3
+    c-0.4-0.4-0.4-1,0-1.4c0.4-0.4,1-0.4,1.4,0c3.9,3.9,3.9,10.2,0,14.1C16.2,21,13.7,22.1,11.1,22.1z"/>
+<path d="M11.1,12.1c-0.6,0-1-0.4-1-1v-10c0-0.6,0.4-1,1-1s1,0.4,1,1v10C12.1,11.6,11.6,12.1,11.1,12.1z"/>
+</svg>
+
+</button>
+   <button id="source" class="source">
+        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="55.9" height =55.9
+     viewBox="0 0 55.9 55.9" style="enable-background:new 0 0 55.9 55.9;" xml:space="preserve">
+<g id="XMLID_5_">
+    <path class="st0" d="M50.5,5.4h-45c-2.8,0-5,2.3-5,5v10h5v-10h45v35.1h-45V35.4h-5v10c0,2.8,2.3,5,5,5h45
+        c2.8,0,5-2.2,5-5v-35C55.5,7.7,53.2,5.4,50.5,5.4z M25.4,37.9l10-10l-10-10v7.5h-25v5h25V37.9z"/>
+</g>
+</svg>
+        </button>
+  </section>
+  <section class="vol-section">
+   <button id="vol-up">
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     viewBox="0 0 82 82" style="enable-background:new 0 0 82 82;" xml:space="preserve">
+<g class="st0">
+    <polygon class="st1" points="0,24.4 0,57.5 17.1,57.5 49.4,75.1 49.4,6.8 17.1,24.4   "/>
+    <rect x="56.3" y="37.4" class="st1" width="23.7" height="7"/>
+</g>
+<g>
+    <polygon points="0,25.3 0,56.7 16.3,56.7 46.9,73.5 46.9,8.5 16.3,25.3   "/>
+    <polygon points="69.8,37.2 69.8,26.5 62.1,26.5 62.1,37.2 51.8,37.2 51.8,44.7 62.1,44.7 62.1,55.5 69.8,55.5 69.8,44.7 80,44.7 
+        80,37.2     "/>
+</g>
+</svg>
+  </button>
+   <button id="vol-down">
+    <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     viewBox="0 0 82 82" style="enable-background:new 0 0 82 82;" xml:space="preserve">
+<g>
+    <polygon points="0,24.4 0,57.5 17.1,57.5 49.4,75.1 49.4,6.8 17.1,24.4   "/>
+    <rect x="56.3" y="37.4" width="23.7" height="7"/>
+</g>
+  </button>
+   <!--Vol Slider?-->
+  </section>
+ </div>
+</div>
+
+<script>
+const powerButton = document.getElementById('power');
+const sourceButton = document.getElementById('source');
+const volUpButton = document.getElementById('vol-up');
+const volDownButton = document.getElementById('vol-down');
+const sendCommand = command => {fetch('/'+command); }
+const power   = () => { sendCommand('power'); };
+const source  = () => { sendCommand('source'); };
+const volUp   = () => { sendCommand('volume_up'); };
+const volDown = () => { sendCommand('volume_down'); };
+powerButton.addEventListener('click', power);
+sourceButton.addEventListener('click', source);
+volUpButton.addEventListener('click', volUp);
+volDownButton.addEventListener('click', volDown);
+</script>
+
+</body>
