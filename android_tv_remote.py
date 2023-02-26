@@ -63,7 +63,7 @@ INDEX_FILE3=dir_path + "/index3.html"
 # ----------------------------------------------
 #
 # ----------------------------------------------
-log = logging.getLogger("tv_remote")
+log = logging.getLogger("atvr")
 logging.basicConfig()
 log.setLevel(logging.INFO)
 
@@ -678,6 +678,33 @@ class AndroidRemote:
             self.sendcommand(i)
 
 # ----------------------------------------------
+# check if certificate exists, create and pair with tv
+# ----------------------------------------------
+def check_certificate_and_pair():
+    # We always need a certificate, create one if it does not exists
+    if not os.path.isfile(CERT_FILE):
+        log.info("Generating certificate")
+        cert, key = generate_selfsigned_cert("atvr")
+        with open(CERT_FILE, "wt") as f: f.write(cert.decode("utf-8") + key.decode("utf-8"))
+
+        # make initial contact to set host/ip via discovery and pair the remote
+        with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
+        SERVER_IP, MODELNAME = getdeviceip(usn)
+        ar = AndroidRemote(SERVER_IP)
+        try:
+            ar.connect() # try connect to see if pairing ok
+            data = ar.ssl_sock.recv(1024) # we need to receive to check if ok
+        except Exception as x:
+            log.info(x)
+            # if str(x).find("SSLV3_ALERT_CERTIFICATE_UNKNOWN") == -1: raise
+            ar.disconnect()
+            ar.connect(pairing=True)
+            if not ar.start_pairing(): sys.exit()
+        finally:
+            ar.disconnect()
+            ar = None
+
+# ----------------------------------------------
 # create a queue for communication with remote-thread
 # ----------------------------------------------
 queue = queue.Queue()
@@ -792,17 +819,12 @@ if __name__ == "__main__":
         with open(DEVICE_FILE, "wt") as f: f.write(usn)
         print()
 
+    check_certificate_and_pair()
+
     with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
     #SERVER_IP, MODELNAME = getdeviceip(usn)
     log.info('We are using device "%s"' % usn)
     #log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
-
-    # We always need a certificate, create one if it does not exists
-    if not os.path.isfile(CERT_FILE):
-        log.info("Generating certificate")
-        cert, key = generate_selfsigned_cert("atvremote")
-        with open(CERT_FILE, "wt") as f: f.write(cert.decode("utf-8") + key.decode("utf-8"))
-        # make initial contact to set host/ip via discovery and pair the remote
 
     try:
         server()
