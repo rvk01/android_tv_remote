@@ -1,0 +1,16 @@
+[Unit]
+Description=Android TV Remote service
+After=network.target network-online.target
+[Service]
+User=pi
+Type=simple
+ExecStart=/home/pi/android_tv_remote/android_tv_remote.py
+Restart=always
+[Install]
+WantedBy=default.target
+
+# chmod +x placeholder.sh
+# sudo cp atvr.service /etc/systemd/system/atvr.service
+# sudo systemctl enable atvr.service
+# sudo systemctl start atvr.service
+# journalctl -u -f atvr

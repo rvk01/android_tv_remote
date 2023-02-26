@@ -609,6 +609,7 @@ class AndroidRemote:
     def check_remote(self):
 
         buffer=bytearray()
+        cnt=0
 
         while True:
 
@@ -617,7 +618,7 @@ class AndroidRemote:
               data = queue.get()
               if data=='STOP':
                   # test exception to see if thread can restart itself
-                  raise Exception("Test exception")
+                  raise Exception("Force (and test) exception to end remote thread")
               self.dostring('KEYCODE_' + data)
 
 
@@ -638,8 +639,12 @@ class AndroidRemote:
 
                 if (buffer[0] > 2) and (buffer[1] == 66):
                     # PING // [10, 66, 8, 8, 1, 16, 193, 249, 197, 163, 9]
-                    log.info('PING')
-                    log.info('PONG');
+                    # less chatty PING/PONG
+                    cnt+=1;
+                    if cnt==10:
+                        log.info('PING')
+                        log.info('PONG')
+                        cnt=0
                     payload = [ 74, 2, 8, 25]
                     message = bytearray(payload)
                     self.send_message(message)
@@ -719,6 +724,9 @@ class http_server:
         httpd.serve_forever()
 
 class myhandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
     def do_GET(self):
         data=self.path[1:].upper() # /Volume_up remove slash
         response = 'Ok... ' + data
