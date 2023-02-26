@@ -460,7 +460,7 @@ class AndroidRemote:
         self.ssl_sock = ssl.wrap_socket(self.sock, keyfile=CERT_FILE, certfile=CERT_FILE, do_handshake_on_connect=True)
         self.ssl_sock.connect((self.host, 6467 if pairing else 6466))
         self.sock.close() # original not needed anymore
-        log.info('connecting to ' + self.host + ' 6467 pairing port' if pairing else ' 6466 remote port')
+        log.info('connecting to ' + self.host + (' 6467 pairing port' if pairing else ' 6466 remote port'))
 
     def disconnect(self):
         self.ssl_sock.shutdown(socket.SHUT_RDWR)
@@ -551,27 +551,61 @@ class AndroidRemote:
 
                 if (buffer[0] == 42) and (buffer[4] == 200):
                     # secret [ 42 8 2 16 200 1 202 2 34 10 32 221 201 193 143 1 1 138 93 202 61 97 186 180 109 33 56 144 252 20 57 13 28 49 249 7 88 250 223 218 2 91 128 ]
+                    hostname=socket.gethostname()
+                    ipaddr=socket.gethostbyname(hostname)
                     log.info('receive correct TV secret code')
                     log.info('pairing success');
+                    log.info('');
+                    log.info('You can now choose to run the program as daemon/service');
+                    log.info('You can exit with CTRL+C and browse to http://%s/index or http://%s/index' % (hostname, ipaddr));
+                    log.info('');
                     return True
 
                 log.debug('rmov ' + str(buffer))
                 del buffer[0:buffer[0] + 1] # remove message from buffer
                 log.debug('rest ' + str(buffer))
 
-
-    def start_remote(self):
+    def check_remote(self):
 
         buffer=bytearray()
+        cnt=0
+        connected=False
 
         while True:
 
-            data = self.ssl_sock.recv(1024)
+            # we receive commands via queue, execute them
+            if connected and not queue.empty():
+              data = queue.get()
+              if data=='STOP':
+                  # test exception to see if thread can restart itself
+                  raise Exception("Force (and test) exception to end remote thread")
+              self.dostring('KEYCODE_' + data)
+
+
+            socket_list = [self.ssl_sock]
+            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], 0)
+            data = None
+            for sock in read_sockets:
+                if sock == self.ssl_sock:
+                    data = self.ssl_sock.recv(1024)
+            if data == None: continue
+
             buffer = buffer + data
+            log.debug('recv ' + str(buffer))
 
             if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
 
-                log.debug('recv ' + str(buffer))
+                if (buffer[0] > 2) and (buffer[1] == 66):
+                    # PING // [10, 66, 8, 8, 1, 16, 193, 249, 197, 163, 9]
+                    # less chatty PING/PONG
+                    cnt+=1;
+                    if cnt==10:
+                        log.info('PING')
+                        log.info('PONG')
+                        cnt=0
+                    payload = [ 74, 2, 8, 25]
+                    message = bytearray(payload)
+                    self.send_message(message)
 
                 if (buffer[0] > 10) and (buffer[1] == 10):
                     # 1e message  [ 106 10, 73, 8, 238, 4, 18, 60, 10, 15, 65,
@@ -593,64 +627,11 @@ class AndroidRemote:
 
                 if (buffer[0] > 2) and (buffer[1] == 194):
                     log.info('WE HAVE A CONNECTION')
-                    return True
-
-                if (buffer[0] > 2) and (buffer[1] == 66):
-                    # PING // [10, 66, 8, 8, 1, 16, 193, 249, 197, 163, 9]
-                    log.info('PING')
-                    log.info('PONG');
-                    payload = [ 74, 2, 8, 25]
-                    message = bytearray(payload)
-                    self.send_message(message)
+                    connected=True
 
                 log.debug('rmov ' + str(buffer))
                 del buffer[0:buffer[0] + 1] # remove message from buffer
 
-    def check_remote(self):
-
-        buffer=bytearray()
-        cnt=0
-
-        while True:
-
-            # we receive commands via queue, execute them
-            if not queue.empty():
-              data = queue.get()
-              if data=='STOP':
-                  # test exception to see if thread can restart itself
-                  raise Exception("Force (and test) exception to end remote thread")
-              self.dostring('KEYCODE_' + data)
-
-
-            socket_list = [self.ssl_sock]
-            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], 0)
-            data = None
-            for sock in read_sockets:
-                if sock == self.ssl_sock:
-                    data = self.ssl_sock.recv(1024)
-            if data == None: continue
-
-            buffer = buffer + data
-            log.debug('recv ' + str(buffer))
-
-            if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
-
-                log.debug('recv ' + str(buffer))
-
-                if (buffer[0] > 2) and (buffer[1] == 66):
-                    # PING // [10, 66, 8, 8, 1, 16, 193, 249, 197, 163, 9]
-                    # less chatty PING/PONG
-                    cnt+=1;
-                    if cnt==10:
-                        log.info('PING')
-                        log.info('PONG')
-                        cnt=0
-                    payload = [ 74, 2, 8, 25]
-                    message = bytearray(payload)
-                    self.send_message(message)
-
-                log.debug('rmov ' + str(buffer))
-                del buffer[0:buffer[0] + 1] # remove message from buffer
 
     def sendkey(self, KEY):
         payload = [ 82, 4, 8, KEY, 16, 1 ]
@@ -668,14 +649,46 @@ class AndroidRemote:
     def dostring(self, cmd):
         if not cmd in globals(): return
         i=globals()[cmd]
-        log.info('Send %s' % cmd)
-
-        if not i in [KEYCODE_CHANNEL_UP, KEYCODE_CHANNEL_DOWN]:
+        if not i in [KEYCODE_CHANNEL_UP, KEYCODE_CHANNEL_DOWN, KEYCODE_TV_TELETEXT, KEYCODE_LAST_CHANNEL]:
             # keycodes
+            log.info('SendKey %s' % cmd)
             self.sendkey(i)
         else:
             # commands
+            log.info('SendCommand %s' % cmd)
             self.sendcommand(i)
+
+# ----------------------------------------------
+# check server.txt and if not exists choose a device
+# ----------------------------------------------
+def check_device_and_choose():
+    if not os.path.isfile(DEVICE_FILE):
+        print("Android TV Remote - Choosing device - (collecting...)")
+        print()
+        devices = discover(5.0,1)
+        #for device, usn in devices:
+        idx=0
+        devices=list(devices)
+        for location, usn in devices:
+             idx+=1
+             o = urllib.parse.urlsplit(location)
+             r = requests.get(location)
+             d = SimpleXMLElement(r.text)
+             x = str(next(d.friendlyName()))
+             print('{0:>2}) {1: <16} {2: <40} {3}'.format(idx,o.hostname, x, usn))
+        print()
+        while True:
+            try:
+                x = input("Enter which device you want to use: ")
+                usn=devices[int(x)-1][1]
+                break
+            except KeyboardInterrupt:
+                print('KEYBOARD INTERRUPT')
+                sys.exit()
+            except:
+                print('Try again')
+        with open(DEVICE_FILE, "wt") as f: f.write(usn)
+        print()
 
 # ----------------------------------------------
 # check if certificate exists, create and pair with tv
@@ -693,13 +706,16 @@ def check_certificate_and_pair():
         ar = AndroidRemote(SERVER_IP)
         try:
             ar.connect() # try connect to see if pairing ok
-            data = ar.ssl_sock.recv(1024) # we need to receive to check if ok
-        except Exception as x:
-            log.info(x)
-            # if str(x).find("SSLV3_ALERT_CERTIFICATE_UNKNOWN") == -1: raise
+            data = ar.ssl_sock.recv(1024) # dummy read, we need to receive to check if ok
+        except ssl.SSLError as e:
+            if e.args[1].find("sslv3 alert") == -1: raise
             ar.disconnect()
             ar.connect(pairing=True)
-            if not ar.start_pairing(): sys.exit()
+            try:
+                if not ar.start_pairing(): sys.exit()
+            except KeyboardInterrupt:
+                print('KEYBOARD INTERRUPT')
+                sys.exit()
         finally:
             ar.disconnect()
             ar = None
@@ -717,22 +733,15 @@ def remote():
     with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
     SERVER_IP, MODELNAME = getdeviceip(usn)
 
-    ar = AndroidRemote(SERVER_IP)
-    try:
-        ar.connect()
-        if not ar.start_remote(): sys.exit()
-    except Exception as x:
-        log.info(x)
-        # if str(x).find("SSLV3_ALERT_CERTIFICATE_UNKNOWN") == -1: raise
-        ar.disconnect()
-        ar.connect(pairing=True)
-        if not ar.start_pairing(): sys.exit()
-
-    log.info("Starting REMOTE with device %s on %s" % (MODELNAME, SERVER_IP))
-
     # main loop with PING/PONG and remote control
     try:
+        ar = AndroidRemote(SERVER_IP)
+        ar.connect()
+        log.info("Starting REMOTE with device %s on %s" % (MODELNAME, SERVER_IP))
         ar.check_remote()
+    except ssl.SSLError as e:
+        if e.args[1].find("sslv3 alert") == -1: raise
+        log.error("Certificate unknown, you need to re-pair. Remove client.pem and start on console.")
     except Exception as x:
         log.info(x)
     finally:
@@ -791,39 +800,16 @@ def server():
 # ----------------------------------------------
 if __name__ == "__main__":
 
-    if not os.path.isfile(DEVICE_FILE):
-        print("Android TV Remote - Choosing device - (collecting...)")
-        print()
-        devices = discover(5.0,1)
-        #for device, usn in devices:
-        idx=0
-        devices=list(devices)
-        for location, usn in devices:
-             idx+=1
-             o = urllib.parse.urlsplit(location)
-             r = requests.get(location)
-             d = SimpleXMLElement(r.text)
-             x = str(next(d.friendlyName()))
-             print('{0:>2}) {1: <16} {2: <40} {3}'.format(idx,o.hostname, x, usn))
-        print()
-        while True:
-            try:
-                x = input("Enter which device you want to use: ")
-                usn=devices[int(x)-1][1]
-                break
-            except KeyboardInterrupt:
-                print()
-                sys.exit()
-            except:
-                print('Try again')
-        with open(DEVICE_FILE, "wt") as f: f.write(usn)
-        print()
-
+    check_device_and_choose()
     check_certificate_and_pair()
 
     with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
-    #SERVER_IP, MODELNAME = getdeviceip(usn)
     log.info('We are using device "%s"' % usn)
+    hostname = socket.getfqdn()
+    log.info('');
+    log.info('You can access a TV Remote page on http://%s/index' % socket.gethostbyname_ex(hostname)[2][1]);
+    log.info('');
+    #SERVER_IP, MODELNAME = getdeviceip(usn) # TV could be off at restart
     #log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
 
     try:
