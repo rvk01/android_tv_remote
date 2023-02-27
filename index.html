@@ -2,46 +2,64 @@
 <html>
 <head>
 <title>Android TV Remote</title>
-
-  <meta http-equiv="Expires" content="0" />
-  <meta http-equiv="Expires" content="Tue, 01 Jan 1995 12:12:12 GMT">
-  <meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
-  <meta http-equiv="Cache-Control" content="max-age=0" />
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta name="robots" content="noindex">
-
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-  <link rel="icon" sizes="192x192" href="android-chrome-192x192.png" />
-  <link rel="apple-touch-icon" sizes="192x192" href="apple-touch-icon.png" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Forums">
-  <meta name="theme-color" content="#0071bc" />
-
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
-
+<meta http-equiv="Expires" content="0" />
+<meta http-equiv="Expires" content="Tue, 01 Jan 1995 12:12:12 GMT">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
+<meta http-equiv="Cache-Control" content="max-age=0" />
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Android TV Remote">
+<meta name="theme-color" content="#0071bc" />
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css'>
 <style>
-button {
+
+body {
+    font-family: Tahoma, Arial, Helvetica, sans-serif;
+    text-decoration: none;
     color: #ffffff;
-    background-color: #2d63c8;
-    font-size: 19px;
-    border: 4px solid #2d63c8;
+    background-color: #000000;
+}
+
+#center {
+  text-align: center;
+}​
+
+.keycode {
+    display: inline-block !important;
+    border: 1px solid #2d63c8;
     border-radius: 10px;
-    padding: 15px 50px;
+    padding: 4px 8px;
+}
+
+.button1 {
+    color: #ffffff;
+    background-color: #000000;
+    border: 1px solid #2d63c8;
+    border-radius: 8px;
+    padding: 0px 0px;
+    width: 85px;
+    height: 85px;
+    margin: 0px;
     cursor: pointer
 }
-button:hover {
+
+.button1:hover {
     color: #2d63c8;
     background-color: #ffffff;
 }
+
 </style>
 </head>
 <body>
+
 <script>
 function doCommand(cmd) {
   fetch("/" + cmd)
@@ -51,33 +69,43 @@ function doCommand(cmd) {
   })
 }
 </script>
-    <button type="button" name="myButton" onclick="doCommand('volume_down')">V-</button>
-    <button type="button" name="myButton" onclick="doCommand('volume_up')">V+</button>
-    <button type="button" name="myButton" onclick="doCommand('mute')"><small>Mute</small></button>
-  <p>
-    <button type="button" name="myButton" onclick="doCommand('channel_down')">CH -</button>
-    <button type="button" name="myButton" onclick="doCommand('channel_up')">Ch +</button>
-  <p>
-    <button type="button" name="myButton" onclick="">&nbsp;</button>
-    <button type="button" name="myButton" onclick="doCommand('dpad_up')">^</button>
-    <button type="button" name="myButton" onclick="">&nbsp;</button>
-  <p>
-    <button type="button" name="myButton" onclick="doCommand('dpad_left')">&lt;</button>
-    <button type="button" name="myButton" onclick="doCommand('dpad_center')">&nbsp;</button>
-    <button type="button" name="myButton" onclick="doCommand('dpad_right')">&gt;</button>
-  <p>
-    <button type="button" name="myButton" onclick="">&nbsp;</button>
-    <button type="button" name="myButton" onclick="doCommand('dpad_down')">V</button>
-    <button type="button" name="myButton" onclick="">&nbsp;</button>
-  <p>
-    <button type="button" name="myButton" onclick="doCommand('back')">&lt;--</button>
-    <button type="button" name="myButton" onclick="">V</button>
-    <button type="button" name="myButton" onclick="doCommand('home')">Home</button>
-  <p>
-    <button type="button" name="myButton" onclick="doCommand('stop')">Stop</button>
-  <p>
-<div>
-  Result: <span id="spanId"></span>
+
+<div id=center>
+<button class="button1 fas fa-5x"             type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-caret-up fa-5x" type=button onclick='doCommand("DPAD_UP")'></button>
+<button class="button1 fas fa-5x"             type=button onclick='doCommand("")'>&nbsp;</button>
+<br>
+<button class="button1 fas fa-caret-left fa-5x"  type=button onclick='doCommand("DPAD_LEFT")'></button>
+<button class="button1 fas fa-5x"                type=button onclick='doCommand("a")'>&nbsp;</button>
+<button class="button1 fas fa-caret-right fa-5x" type=button onclick='doCommand("DPAD_RIGHT")'></button>
+<br>
+<button class="button1 fas fa-5x"               type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-caret-down fa-5x" type=button onclick='doCommand("DPAD_DOWN")'></button>
+<button class="button1 fas fa-5x"               type=button onclick='doCommand("")'>&nbsp;</button>
+<br>
+<br>
+<button class="button1 fas fa-reply fa-3x" type=button onclick='doCommand("BACK")'></button>
+<button class="button1 fas fa-home fa-3x" type=button onclick='doCommand("HOME")'></button>
+<button class="button1 fas fa-volume-mute fa-3x" type=button onclick='doCommand("MUTE")'></button>
+<br>
+<br>
+<button class="button1 fas fa-volume-up fa-3x" type=button onclick='doCommand("VOLUME_UP")'></button>
+<button class="button1 fas fa-caret-up fa-3x" type=button onclick='doCommand("CHANNEL_UP")'></button>
+<button class="button1 fas fa-sign-out-alt fa-3x" type=button onclick='doCommand("stop")'></button>
+<br>
+<button class="button1 fas fa-volume-down fa-3x" type=button onclick='doCommand("VOLUME_DOWN")'></button>
+<button class="button1 fas fa-caret-down fa-3x" type=button onclick='doCommand("CHANNEL_DOWN")'></button>
+<button class="button1 fas fa-3x" type=button onclick='doCommand("")'>&nbsp;</button>
+
 </div>
+
+<div>
+<span id="spanId">X</span>
+</div>
+
+<a href=/index0>/index0</a><br>
+<a href=/index2>/index2</a>
+
 </body>
 </html>
+
