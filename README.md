@@ -1,8 +1,7 @@
 # Android TV Remote
 
 ## About this project
-This is a python3 script for Android TV and Google TV remote control.
-
+This is a python3 script for Android TV and Google TV remote control.<br>
 It uses the newer protocol of [remote services](https://www.apkmirror.com/apk/google-inc/android-tv-remote-service-android-tv/) version >= 5<br>
 
 ## Quickstart
@@ -43,5 +42,5 @@ View messages from the script (-f is follow output live)
 
 ## Acknowledgments
 This project wouldn't have been possible without these awesome projects which reverse-engineered these protocols.
- - [Aymkdn](https://github.com/Aymkdn)'s wiki on the protocol [V2](https://github.com/Aymkdn/assistant-freebox-cloud/wiki/Google-TV-(aka-Android-TV)-Remote-Control-(v2))
+ - [Aymkdn](https://github.com/Aymkdn)'s wiki on the protocol [Remote Control (v2)](https://github.com/Aymkdn/assistant-freebox-cloud/wiki/Google-TV-(aka-Android-TV)-Remote-Control-(v2))
  - [louis49](https://github.com/louis49/androidtv-remote)'s [androidtv-remote](https://github.com/louis49/androidtv-remote) js implementation (especially for the v2 proto files)
