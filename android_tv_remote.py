@@ -335,7 +335,7 @@ class AndroidRemote:
 
             if int(time.time()) - sc > 60: # long time no PING, still connected?
                 sc=int(time.time())
-                log.info('Disconnected? We did not recieve a PING for 60 seconds.')
+                log.info('Disconnected? We did not recieve a PING request for 30 seconds.')
                 return
 
             if data == None: continue
@@ -360,7 +360,7 @@ class AndroidRemote:
                         log.info('PONG')
                         cnt=0
                     p = remotemessage_pb2.RemoteMessage()
-                    p.remote_ping_response.val1 = 1
+                    p.remote_ping_response.val1 = m.remote_ping_request.val1
                     self.send_message(p)
 
                 if m.HasField('remote_configure'):
@@ -508,7 +508,7 @@ def remote():
         log.info(x)
 
     finally:
-        if not queue.empty(): log.info('empty queue')
+        if not queue.empty(): log.info('Clear the queue')
         while not queue.empty(): data = queue.get()
         ar.disconnect()
         ar = None
