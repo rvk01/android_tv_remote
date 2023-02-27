@@ -36,6 +36,8 @@ import queue
 import hashlib
 import requests
 import urllib.parse
+import pairingmessage_pb2
+import remotemessage_pb2
 #from lxml import etree
 from pysimplesoap.simplexml import SimpleXMLElement
 from OpenSSL.crypto import load_certificate
@@ -67,315 +69,6 @@ log = logging.getLogger("atvr")
 logging.basicConfig()
 log.setLevel(logging.INFO)
 
-# ----------------------------------------------
-# All Keycodes
-# ----------------------------------------------
-KEYCODE_UNKNOWN = 0;
-KEYCODE_SOFT_LEFT = 1;
-KEYCODE_SOFT_RIGHT = 2;
-KEYCODE_HOME = 3;
-KEYCODE_BACK = 4;
-KEYCODE_CALL = 5;
-KEYCODE_ENDCALL = 6;
-KEYCODE_0 = 7;
-KEYCODE_1 = 8;
-KEYCODE_2 = 9;
-KEYCODE_3 = 10;
-KEYCODE_4 = 11;
-KEYCODE_5 = 12;
-KEYCODE_6 = 13;
-KEYCODE_7 = 14;
-KEYCODE_8 = 15;
-KEYCODE_9 = 16;
-KEYCODE_STAR = 17;
-KEYCODE_POUND = 18;
-KEYCODE_DPAD_UP = 19;
-KEYCODE_DPAD_DOWN = 20;
-KEYCODE_DPAD_LEFT = 21;
-KEYCODE_DPAD_RIGHT = 22;
-KEYCODE_DPAD_CENTER = 23;
-KEYCODE_VOLUME_UP = 24;
-KEYCODE_VOLUME_DOWN = 25;
-KEYCODE_POWER = 26;
-KEYCODE_CAMERA = 27;
-KEYCODE_CLEAR = 28;
-KEYCODE_A = 29;
-KEYCODE_B = 30;
-KEYCODE_C = 31;
-KEYCODE_D = 32;
-KEYCODE_E = 33;
-KEYCODE_F = 34;
-KEYCODE_G = 35;
-KEYCODE_H = 36;
-KEYCODE_I = 37;
-KEYCODE_J = 38;
-KEYCODE_K = 39;
-KEYCODE_L = 40;
-KEYCODE_M = 41;
-KEYCODE_N = 42;
-KEYCODE_O = 43;
-KEYCODE_P = 44;
-KEYCODE_Q = 45;
-KEYCODE_R = 46;
-KEYCODE_S = 47;
-KEYCODE_T = 48;
-KEYCODE_U = 49;
-KEYCODE_V = 50;
-KEYCODE_W = 51;
-KEYCODE_X = 52;
-KEYCODE_Y = 53;
-KEYCODE_Z = 54;
-KEYCODE_COMMA = 55;
-KEYCODE_PERIOD = 56;
-KEYCODE_ALT_LEFT = 57;
-KEYCODE_ALT_RIGHT = 58;
-KEYCODE_SHIFT_LEFT = 59;
-KEYCODE_SHIFT_RIGHT = 60;
-KEYCODE_TAB = 61;
-KEYCODE_SPACE = 62;
-KEYCODE_SYM = 63;
-KEYCODE_EXPLORER = 64;
-KEYCODE_ENVELOPE = 65;
-KEYCODE_ENTER = 66;
-KEYCODE_DEL = 67;
-KEYCODE_GRAVE = 68;
-KEYCODE_MINUS = 69;
-KEYCODE_EQUALS = 70;
-KEYCODE_LEFT_BRACKET = 71;
-KEYCODE_RIGHT_BRACKET = 72;
-KEYCODE_BACKSLASH = 73;
-KEYCODE_SEMICOLON = 74;
-KEYCODE_APOSTROPHE = 75;
-KEYCODE_SLASH = 76;
-KEYCODE_AT = 77;
-KEYCODE_NUM = 78;
-KEYCODE_HEADSETHOOK = 79;
-KEYCODE_FOCUS = 80;
-KEYCODE_PLUS = 81;
-KEYCODE_MENU = 82;
-KEYCODE_NOTIFICATION = 83;
-KEYCODE_SEARCH = 84;
-KEYCODE_MEDIA_PLAY_PAUSE= 85;
-KEYCODE_MEDIA_STOP = 86;
-KEYCODE_MEDIA_NEXT = 87;
-KEYCODE_MEDIA_PREVIOUS = 88;
-KEYCODE_MEDIA_REWIND = 89;
-KEYCODE_MEDIA_FAST_FORWARD = 90;
-KEYCODE_MUTE = 91;
-KEYCODE_PAGE_UP = 92;
-KEYCODE_PAGE_DOWN = 93;
-KEYCODE_PICTSYMBOLS = 94;
-KEYCODE_SWITCH_CHARSET = 95;
-KEYCODE_BUTTON_A = 96;
-KEYCODE_BUTTON_B = 97;
-KEYCODE_BUTTON_C = 98;
-KEYCODE_BUTTON_X = 99;
-KEYCODE_BUTTON_Y = 100;
-KEYCODE_BUTTON_Z = 101;
-KEYCODE_BUTTON_L1 = 102;
-KEYCODE_BUTTON_R1 = 103;
-KEYCODE_BUTTON_L2 = 104;
-KEYCODE_BUTTON_R2 = 105;
-KEYCODE_BUTTON_THUMBL = 106;
-KEYCODE_BUTTON_THUMBR = 107;
-KEYCODE_BUTTON_START = 108;
-KEYCODE_BUTTON_SELECT = 109;
-KEYCODE_BUTTON_MODE = 110;
-KEYCODE_ESCAPE = 111;
-KEYCODE_FORWARD_DEL = 112;
-KEYCODE_CTRL_LEFT = 113;
-KEYCODE_CTRL_RIGHT = 114;
-KEYCODE_CAPS_LOCK = 115;
-KEYCODE_SCROLL_LOCK = 116;
-KEYCODE_META_LEFT = 117;
-KEYCODE_META_RIGHT = 118;
-KEYCODE_FUNCTION = 119;
-KEYCODE_SYSRQ = 120;
-KEYCODE_BREAK = 121;
-KEYCODE_MOVE_HOME = 122;
-KEYCODE_MOVE_END = 123;
-KEYCODE_INSERT = 124;
-KEYCODE_FORWARD = 125;
-KEYCODE_MEDIA_PLAY = 126;
-KEYCODE_MEDIA_PAUSE = 127;
-KEYCODE_MEDIA_CLOSE = 128;
-KEYCODE_MEDIA_EJECT = 129;
-KEYCODE_MEDIA_RECORD = 130;
-KEYCODE_F1 = 131;
-KEYCODE_F2 = 132;
-KEYCODE_F3 = 133;
-KEYCODE_F4 = 134;
-KEYCODE_F5 = 135;
-KEYCODE_F6 = 136;
-KEYCODE_F7 = 137;
-KEYCODE_F8 = 138;
-KEYCODE_F9 = 139;
-KEYCODE_F10 = 140;
-KEYCODE_F11 = 141;
-KEYCODE_F12 = 142;
-KEYCODE_NUM_LOCK = 143;
-KEYCODE_NUMPAD_0 = 144;
-KEYCODE_NUMPAD_1 = 145;
-KEYCODE_NUMPAD_2 = 146;
-KEYCODE_NUMPAD_3 = 147;
-KEYCODE_NUMPAD_4 = 148;
-KEYCODE_NUMPAD_5 = 149;
-KEYCODE_NUMPAD_6 = 150;
-KEYCODE_NUMPAD_7 = 151;
-KEYCODE_NUMPAD_8 = 152;
-KEYCODE_NUMPAD_9 = 153;
-KEYCODE_NUMPAD_DIVIDE = 154;
-KEYCODE_NUMPAD_MULTIPLY = 155;
-KEYCODE_NUMPAD_SUBTRACT = 156;
-KEYCODE_NUMPAD_ADD = 157;
-KEYCODE_NUMPAD_DOT = 158;
-KEYCODE_NUMPAD_COMMA = 159;
-KEYCODE_NUMPAD_ENTER = 160;
-KEYCODE_NUMPAD_EQUALS = 161;
-KEYCODE_NUMPAD_LEFT_PAREN = 162;
-KEYCODE_NUMPAD_RIGHT_PAREN = 163;
-KEYCODE_VOLUME_MUTE = 164;
-KEYCODE_INFO = 165;
-KEYCODE_CHANNEL_UP = 166;
-KEYCODE_CHANNEL_DOWN = 167;
-KEYCODE_ZOOM_IN = 168;
-KEYCODE_ZOOM_OUT = 169;
-KEYCODE_TV = 170;
-KEYCODE_WINDOW = 171;
-KEYCODE_GUIDE = 172;
-KEYCODE_DVR = 173;
-KEYCODE_BOOKMARK = 174;
-KEYCODE_CAPTIONS = 175;
-KEYCODE_SETTINGS = 176;
-KEYCODE_TV_POWER = 177;
-KEYCODE_TV_INPUT = 178;
-KEYCODE_STB_POWER = 179;
-KEYCODE_STB_INPUT = 180;
-KEYCODE_AVR_POWER = 181;
-KEYCODE_AVR_INPUT = 182;
-KEYCODE_PROG_RED = 183;
-KEYCODE_PROG_GREEN = 184;
-KEYCODE_PROG_YELLOW = 185;
-KEYCODE_PROG_BLUE = 186;
-KEYCODE_APP_SWITCH = 187;
-KEYCODE_BUTTON_1 = 188;
-KEYCODE_BUTTON_2 = 189;
-KEYCODE_BUTTON_3 = 190;
-KEYCODE_BUTTON_4 = 191;
-KEYCODE_BUTTON_5 = 192;
-KEYCODE_BUTTON_6 = 193;
-KEYCODE_BUTTON_7 = 194;
-KEYCODE_BUTTON_8 = 195;
-KEYCODE_BUTTON_9 = 196;
-KEYCODE_BUTTON_10 = 197;
-KEYCODE_BUTTON_11 = 198;
-KEYCODE_BUTTON_12 = 199;
-KEYCODE_BUTTON_13 = 200;
-KEYCODE_BUTTON_14 = 201;
-KEYCODE_BUTTON_15 = 202;
-KEYCODE_BUTTON_16 = 203;
-KEYCODE_LANGUAGE_SWITCH = 204;
-KEYCODE_MANNER_MODE = 205;
-KEYCODE_3D_MODE = 206;
-KEYCODE_CONTACTS = 207;
-KEYCODE_CALENDAR = 208;
-KEYCODE_MUSIC = 209;
-KEYCODE_CALCULATOR = 210;
-KEYCODE_ZENKAKU_HANKAKU = 211;
-KEYCODE_EISU = 212;
-KEYCODE_MUHENKAN = 213;
-KEYCODE_HENKAN = 214;
-KEYCODE_KATAKANA_HIRAGANA = 215;
-KEYCODE_YEN = 216;
-KEYCODE_RO = 217;
-KEYCODE_KANA = 218;
-KEYCODE_ASSIST = 219;
-KEYCODE_BRIGHTNESS_DOWN = 220;
-KEYCODE_BRIGHTNESS_UP = 221;
-KEYCODE_MEDIA_AUDIO_TRACK = 222;
-KEYCODE_SLEEP = 223;
-KEYCODE_WAKEUP = 224;
-KEYCODE_PAIRING = 225;
-KEYCODE_MEDIA_TOP_MENU = 226;
-KEYCODE_11 = 227;
-KEYCODE_12 = 228;
-KEYCODE_LAST_CHANNEL = 229;
-KEYCODE_TV_DATA_SERVICE = 230;
-KEYCODE_VOICE_ASSIST = 231;
-KEYCODE_TV_RADIO_SERVICE = 232;
-KEYCODE_TV_TELETEXT = 233;
-KEYCODE_TV_NUMBER_ENTRY = 234;
-KEYCODE_TV_TERRESTRIAL_ANALOG = 235;
-KEYCODE_TV_TERRESTRIAL_DIGITAL = 236;
-KEYCODE_TV_SATELLITE = 237;
-KEYCODE_TV_SATELLITE_BS = 238;
-KEYCODE_TV_SATELLITE_CS = 239;
-KEYCODE_TV_SATELLITE_SERVICE = 240;
-KEYCODE_TV_NETWORK = 241;
-KEYCODE_TV_ANTENNA_CABLE = 242;
-KEYCODE_TV_INPUT_HDMI_1 = 243;
-KEYCODE_TV_INPUT_HDMI_2 = 244;
-KEYCODE_TV_INPUT_HDMI_3 = 245;
-KEYCODE_TV_INPUT_HDMI_4 = 246;
-KEYCODE_TV_INPUT_COMPOSITE_1 = 247;
-KEYCODE_TV_INPUT_COMPOSITE_2 = 248;
-KEYCODE_TV_INPUT_COMPONENT_1 = 249;
-KEYCODE_TV_INPUT_COMPONENT_2 = 250;
-KEYCODE_TV_INPUT_VGA_1 = 251;
-KEYCODE_TV_AUDIO_DESCRIPTION = 252;
-KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP = 253;
-KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN = 254;
-KEYCODE_TV_ZOOM_MODE = 255;
-KEYCODE_TV_CONTENTS_MENU = 256;
-KEYCODE_TV_MEDIA_CONTEXT_MENU = 257;
-KEYCODE_TV_TIMER_PROGRAMMING = 258;
-KEYCODE_HELP = 259;
-KEYCODE_NAVIGATE_PREVIOUS = 260;
-KEYCODE_NAVIGATE_NEXT = 261;
-KEYCODE_NAVIGATE_IN = 262;
-KEYCODE_NAVIGATE_OUT = 263;
-KEYCODE_STEM_PRIMARY = 264;
-KEYCODE_STEM_1 = 265;
-KEYCODE_STEM_2 = 266;
-KEYCODE_STEM_3 = 267;
-KEYCODE_DPAD_UP_LEFT = 268;
-KEYCODE_DPAD_DOWN_LEFT = 269;
-KEYCODE_DPAD_UP_RIGHT = 270;
-KEYCODE_DPAD_DOWN_RIGHT = 271;
-KEYCODE_MEDIA_SKIP_FORWARD = 272;
-KEYCODE_MEDIA_SKIP_BACKWARD = 273;
-KEYCODE_MEDIA_STEP_FORWARD = 274;
-KEYCODE_MEDIA_STEP_BACKWARD = 275;
-KEYCODE_SOFT_SLEEP = 276;
-KEYCODE_CUT = 277;
-KEYCODE_COPY = 278;
-KEYCODE_PASTE = 279;
-KEYCODE_SYSTEM_NAVIGATION_UP = 280;
-KEYCODE_SYSTEM_NAVIGATION_DOWN = 281;
-KEYCODE_SYSTEM_NAVIGATION_LEFT = 282;
-KEYCODE_SYSTEM_NAVIGATION_RIGHT = 283;
-KEYCODE_ALL_APPS = 284;
-KEYCODE_REFRESH = 285;
-KEYCODE_THUMBS_UP = 286;
-KEYCODE_THUMBS_DOWN = 287;
-KEYCODE_PROFILE_SWITCH = 288;
-KEYCODE_VIDEO_APP_1 = 289;
-KEYCODE_VIDEO_APP_2 = 290;
-KEYCODE_VIDEO_APP_3 = 291;
-KEYCODE_VIDEO_APP_4 = 292;
-KEYCODE_VIDEO_APP_5 = 293;
-KEYCODE_VIDEO_APP_6 = 294;
-KEYCODE_VIDEO_APP_7 = 295;
-KEYCODE_VIDEO_APP_8 = 296;
-KEYCODE_FEATURED_APP_1 = 297;
-KEYCODE_FEATURED_APP_2 = 298;
-KEYCODE_FEATURED_APP_3 = 299;
-KEYCODE_FEATURED_APP_4 = 300;
-KEYCODE_DEMO_APP_1 = 301;
-KEYCODE_DEMO_APP_2 = 302;
-KEYCODE_DEMO_APP_3 = 303;
-KEYCODE_DEMO_APP_4 = 304;
-
 def discover(timeout=1.0, retries=1, want_usn=None):
     locations = []
     group = ('239.255.255.250', 1900)
@@ -405,6 +98,16 @@ def discover(timeout=1.0, retries=1, want_usn=None):
                 break
     locations = set({i: j for i,j in reversed(locations)}.items())
     return  locations
+
+def msg2str(arr):
+    v = ''.join((format(x, '1d')+' ') for x in arr)
+    return v
+
+def enumvalid(str, enum):
+    try:
+        return enum.Value(str)
+    except ValueError as e: # Above assignment throws a ValueError, caught here
+        return None
 
 def getdeviceip(want_usn):
     devices = discover(5.0,1,want_usn)
@@ -463,24 +166,30 @@ class AndroidRemote:
         log.info('connecting to ' + self.host + (' 6467 pairing port' if pairing else ' 6466 remote port'))
 
     def disconnect(self):
-        self.ssl_sock.shutdown(socket.SHUT_RDWR)
-        self.ssl_sock.close()
+        try: # only exception we handle here because it doesn't matter
+            self.ssl_sock.shutdown(socket.SHUT_RDWR)
+            self.ssl_sock.close()
+        except Exception as x:
+            log.info(x)
         log.info('disconnected')
 
     def send_message(self, msg):
-        log.debug('---> ' + str(msg))
-        self.ssl_sock.send((len(msg)).to_bytes(1, byteorder='big'))
-        self.ssl_sock.send(msg)
+        m = bytearray(msg.SerializeToString())
+        log.debug('---> ' + msg2str(m))
+        log.debug('---> ' + str(m))
+        self.ssl_sock.send((len(m)).to_bytes(1, byteorder='big'))
+        self.ssl_sock.send(m)
 
     def start_pairing(self):
 
         buffer=bytearray()
 
-        payload=[ 8, 2, 16, 200, 1, 82, 43, 10,
-              21, 105, 110, 102, 111, 46, 107, 111, 100, 111, 110, 111, 46, 97, 115, 115, 105, 115, 116, 97, 110, 116,
-              18, 13, 105, 110, 116, 101, 114, 102, 97, 99, 101, 32, 119, 101, 98]
-        message = bytearray(payload)
-        self.send_message(message)
+        p=pairingmessage_pb2.PairingMessage()
+        p.pairing_request.service_name = 'com.atvr.test'
+        p.pairing_request.client_name = 'atvr'
+        p.status = pairingmessage_pb2.PairingMessage.STATUS_OK
+        p.protocol_version = 2
+        self.send_message(p)
 
         while True:
 
@@ -490,28 +199,46 @@ class AndroidRemote:
             if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
 
                 log.debug('recv ' + str(buffer))
+                m = pairingmessage_pb2.PairingMessage()
+                m.ParseFromString(bytes(buffer[1:]))
+                log.debug(m)
 
-                if (buffer[0] == 7) and (buffer[6] == 90):
-                    # pair response [ 8, 2, 16, 200, 1, 90, 0 ]
+                if m.HasField('pairing_request_ack'):
                     log.info('receive pairing response')
                     log.info('send options')
-                    payload = [ 8, 2, 16, 200, 1, 162, 1, 8, 10, 4, 8, 3, 16, 6, 24, 1 ]
-                    message = bytearray(payload)
-                    self.send_message(message)
+                    p=pairingmessage_pb2.PairingMessage()
+                    p.pairing_option.preferred_role = pairingmessage_pb2.ROLE_TYPE_INPUT
+                    p.pairing_option.input_encodings.add()
+                    p.pairing_option.input_encodings[0].type = pairingmessage_pb2.PairingEncoding.ENCODING_TYPE_HEXADECIMAL
+                    p.pairing_option.input_encodings[0].symbol_length = 6
+                    p.status = pairingmessage_pb2.PairingMessage.STATUS_OK
+                    p.protocol_version = 2
+                    self.send_message(p)
 
-                if (buffer[0] == 16) and (buffer[6] == 162):
-                    # option response [ 8, 2, 16, 200, 1, 162, 1, 8, 18, 4, 8, 3, 16, 6, 24, 1 ]
+                if m.HasField('pairing_option'):
                     log.info('receive option response')
                     log.info('Send config');
-                    payload = [ 8, 2, 16, 200, 1, 242, 1, 8, 10, 4, 8, 3, 16, 6, 16, 1 ];
-                    message = bytearray(payload)
-                    self.send_message(message)
+                    p=pairingmessage_pb2.PairingMessage()
+                    p.pairing_configuration.client_role = pairingmessage_pb2.ROLE_TYPE_INPUT
+                    p.pairing_configuration.encoding.type = pairingmessage_pb2.PairingEncoding.ENCODING_TYPE_HEXADECIMAL
+                    p.pairing_configuration.encoding.symbol_length = 6
+                    p.status = pairingmessage_pb2.PairingMessage.STATUS_OK
+                    p.protocol_version = 2
+                    self.send_message(p)
 
-                if (buffer[0] == 8) and (buffer[6] == 250):
-                    # config response [ 8, 2, 16, 200, 1, 250, 1, 0 ]
+                if m.HasField('pairing_configuration_ack'):
                     log.info('receive config response')
 
-                    input_code = input('Enter LAST 4 DIGITS from TV code? ')
+                    try:
+                        print('')
+                        print('Enter last 4 digits of the TV code (whole code is OK, and not case sensitive.')
+                        print('')
+                        input_code = input('Enter code? ')
+                        print('')
+                    except KeyboardInterrupt:
+                        print('')
+                        print('KEYBOARD INTERRUPT')
+                        return False
 
                     with open(CERT_FILE, 'rb') as fp: cert = load_certificate(FILETYPE_PEM, fp.read())
                     server_cert = Certificate.load(self.ssl_sock.getpeercert(True))
@@ -539,25 +266,26 @@ class AndroidRemote:
 
                     log.info('Sending TV secret code');
                     message = bytearray(hash_result)
-                    p = [ 8, 2, 16, 200, 1, 194, 2, 34, 10, 32] # + 32 bytes secret 42 bytes !
-                    message[0:0] = p
-                    self.send_message(message)
 
-                if (buffer[0] == 5) and (buffer[4] in [144, 146]):
-                    # response [ 6, 5, 8, 2, 16, 144, 3]
+                    p=pairingmessage_pb2.PairingMessage()
+                    p.pairing_secret.secret = bytes(message)
+                    p.status = pairingmessage_pb2.PairingMessage.STATUS_OK
+                    p.protocol_version = 2
+                    self.send_message(p)
+
+                if (m.status == pairingmessage_pb2.PairingMessage.STATUS_BAD_SECRET):
                     log.info('receive wrong TV secret code')
                     log.info('pairing unsuccesful')
                     return False
 
-                if (buffer[0] == 42) and (buffer[4] == 200):
-                    # secret [ 42 8 2 16 200 1 202 2 34 10 32 221 201 193 143 1 1 138 93 202 61 97 186 180 109 33 56 144 252 20 57 13 28 49 249 7 88 250 223 218 2 91 128 ]
+                if m.HasField('pairing_secret_ack'):
                     hostname=socket.gethostname()
                     ipaddr=socket.gethostbyname(hostname)
                     log.info('receive correct TV secret code')
                     log.info('pairing success');
                     log.info('');
                     log.info('You can now choose to run the program as daemon/service');
-                    log.info('You can exit with CTRL+C and browse to http://%s/index or http://%s/index' % (hostname, ipaddr));
+                    log.info('You can exit with CTRL+C and browse to http://%s/index or /index0' % ipaddr);
                     log.info('');
                     return True
 
@@ -572,6 +300,11 @@ class AndroidRemote:
         connected=False
 
         while True:
+
+            global stop_threads
+            if stop_threads:
+                log.info('STOP REMOTE THREAD')
+                break
 
             # we receive commands via queue, execute them
             if connected and not queue.empty():
@@ -591,41 +324,50 @@ class AndroidRemote:
             if data == None: continue
 
             buffer = buffer + data
-            log.debug('recv ' + str(buffer))
 
             if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
 
-                if (buffer[0] > 2) and (buffer[1] == 66):
-                    # PING // [10, 66, 8, 8, 1, 16, 193, 249, 197, 163, 9]
+                log.debug('recv ' + str(buffer))
+                m = remotemessage_pb2.RemoteMessage()
+                m.ParseFromString(bytes(buffer[1:]))
+                log.debug(m)
+
+                if m.HasField('remote_ping_request'):
                     # less chatty PING/PONG
                     cnt+=1;
                     if cnt==10:
                         log.info('PING')
                         log.info('PONG')
                         cnt=0
-                    payload = [ 74, 2, 8, 25]
-                    message = bytearray(payload)
-                    self.send_message(message)
+                    p = remotemessage_pb2.RemoteMessage()
+                    p.remote_ping_response.val1 = 1
+                    self.send_message(p)
 
-                if (buffer[0] > 10) and (buffer[1] == 10):
-                    # 1e message  [ 106 10, 73, 8, 238, 4, 18, 60, 10, 15, 65,
-                    log.info('receive 1st message')
-                    log.info('sending 1st message');
-                    payload = [ 10, 66, 8, 238, 4, 18, 61, 10, 15, 65,
-                    115, 115, 105, 115, 116, 97, 110, 116, 32, 67, 108, 111, 117, 100, 18, 6, 75, 111, 100, 111, 110, 111, 24, 1, 34, 2, 49, 48, 42, 21, 105, 110, 102, 111, 46,
-                    107, 111, 100, 111, 110, 111, 46, 97, 115, 115, 105, 115, 116, 97, 110, 116, 50, 5, 49, 46, 48, 46, 48]
-                    message = bytearray(payload)
-                    self.send_message(message)
+                if m.HasField('remote_configure'):
+                    log.info('receive config')
+                    log.info('sending config');
 
-                if (buffer[0] > 1) and (buffer[1] == 18):
-                    # 2e message // [ 2, 18, 0 ]
-                    log.info('receive 2nd message')
-                    log.info('sending 2nd message');
-                    payload = [ 18, 3, 8, 238, 4]
-                    message = bytearray(payload)
-                    self.send_message(message)
+                    p = remotemessage_pb2.RemoteMessage()
+                    p.remote_configure.code1 = 622
+                    p.remote_configure.device_info.model = 'atvr'
+                    p.remote_configure.device_info.vendor = 'rvk01'
+                    p.remote_configure.device_info.unknown1 = 1
+                    p.remote_configure.device_info.unknown2 = '1'
+                    p.remote_configure.device_info.package_name = 'atvr'
+                    p.remote_configure.device_info.app_version = '0.0.2'
+                    self.send_message(p)
 
-                if (buffer[0] > 2) and (buffer[1] == 194):
+
+                if m.HasField('remote_set_active'):
+                    log.info('receive set active')
+                    log.info('sending set active');
+
+                    p = remotemessage_pb2.RemoteMessage()
+                    p.remote_set_active.active = 622
+                    self.send_message(p)
+
+
+                if m.HasField('remote_start'):
                     log.info('WE HAVE A CONNECTION')
                     connected=True
 
@@ -633,30 +375,25 @@ class AndroidRemote:
                 del buffer[0:buffer[0] + 1] # remove message from buffer
 
 
-    def sendkey(self, KEY):
-        payload = [ 82, 4, 8, KEY, 16, 1 ]
-        message = bytearray(payload)
-        self.send_message(message)
-        payload = [ 82, 4, 8, KEY, 16, 2 ]
-        message = bytearray(payload)
-        self.send_message(message)
+    def sendkey(self, KEY, dir):
+        p = remotemessage_pb2.RemoteMessage()
+        p.remote_key_inject.key_code = KEY
+        p.remote_key_inject.direction = remotemessage_pb2.START_LONG
+        self.send_message(p)
+        p.remote_key_inject.direction = remotemessage_pb2.END_LONG
+        self.send_message(p)
 
-    def sendcommand(self, KEY):
-        payload = [ 82, 5, 8, KEY, 1, 16, 3 ]
-        message = bytearray(payload)
-        self.send_message(message)
+    def sendkey2(self, KEY):
+        p = remotemessage_pb2.RemoteMessage()
+        p.remote_key_inject.key_code = KEY
+        p.remote_key_inject.direction = remotemessage_pb2.SHORT
+        self.send_message(p)
 
     def dostring(self, cmd):
-        if not cmd in globals(): return
-        i=globals()[cmd]
-        if not i in [KEYCODE_CHANNEL_UP, KEYCODE_CHANNEL_DOWN, KEYCODE_TV_TELETEXT, KEYCODE_LAST_CHANNEL]:
-            # keycodes
-            log.info('SendKey %s' % cmd)
-            self.sendkey(i)
-        else:
-            # commands
-            log.info('SendCommand %s' % cmd)
-            self.sendcommand(i)
+        if not enumvalid(cmd, remotemessage_pb2.RemoteKeyCode): return
+        i=remotemessage_pb2.RemoteKeyCode.Value(cmd)
+        log.info('SendKey %s' % cmd)
+        self.sendkey(i)
 
 # ----------------------------------------------
 # check server.txt and if not exists choose a device
@@ -707,15 +444,11 @@ def check_certificate_and_pair():
         try:
             ar.connect() # try connect to see if pairing ok
             data = ar.ssl_sock.recv(1024) # dummy read, we need to receive to check if ok
-        except ssl.SSLError as e:
-            if e.args[1].find("sslv3 alert") == -1: raise
+        except ssl.SSLError as x:
+            if x.args[1].find("sslv3 alert") == -1: raise
             ar.disconnect()
             ar.connect(pairing=True)
-            try:
-                if not ar.start_pairing(): sys.exit()
-            except KeyboardInterrupt:
-                print('KEYBOARD INTERRUPT')
-                sys.exit()
+            if not ar.start_pairing(): sys.exit()
         finally:
             ar.disconnect()
             ar = None
@@ -724,6 +457,7 @@ def check_certificate_and_pair():
 # create a queue for communication with remote-thread
 # ----------------------------------------------
 queue = queue.Queue()
+stop_threads = False
 
 # ----------------------------------------------
 # Thread function for starting REMOTE
@@ -739,13 +473,17 @@ def remote():
         ar.connect()
         log.info("Starting REMOTE with device %s on %s" % (MODELNAME, SERVER_IP))
         ar.check_remote()
-    except ssl.SSLError as e:
-        if e.args[1].find("sslv3 alert") == -1: raise
-        log.error("Certificate unknown, you need to re-pair. Remove client.pem and start on console.")
+    except ssl.SSLError as x:
+        if x.args[1].find("sslv3 alert") != -1:
+            log.error("Certificate unknown, you need to re-pair. Remove client.pem and start on console.")
+        else:
+            log.info(x)
     except Exception as x:
         log.info(x)
+
     finally:
         ar.disconnect()
+        ar = None
 
 # ----------------------------------------------
 # Thread function for UDP server
@@ -767,7 +505,7 @@ class myhandler(BaseHTTPRequestHandler):
         data=self.path[1:].upper() # /Volume_up remove slash
         response = 'Ok... ' + data
 
-        if 'KEYCODE_'+data in globals() or data=='STOP':
+        if not enumvalid('KEYCODE_'+data, remotemessage_pb2.RemoteKeyCode) is None or data=='STOP':
             if not self.server.t1.is_alive() and not data=='STOP':
                 log.info('Remote was stopped and we now have a code (%s), so restarting REMOTE thread' % data)
                 self.server.t1 = None
@@ -807,7 +545,7 @@ if __name__ == "__main__":
     log.info('We are using device "%s"' % usn)
     hostname = socket.getfqdn()
     log.info('');
-    log.info('You can access a TV Remote page on http://%s/index' % socket.gethostbyname_ex(hostname)[2][1]);
+    log.info('You can access a TV Remote page on http://%s/index or /index0' % socket.gethostbyname_ex(hostname)[2][1]);
     log.info('');
     #SERVER_IP, MODELNAME = getdeviceip(usn) # TV could be off at restart
     #log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
@@ -816,10 +554,13 @@ if __name__ == "__main__":
         server()
     except KeyboardInterrupt:
         log.error("Keyboard interrupt " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        sys.exit()
     except Exception as x:
         log.error("Error " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         log.error(x)
+        sys.exit()
     finally:
         log.info("exit " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        stop_threads = True
         pass
 
