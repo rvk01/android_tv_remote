@@ -335,10 +335,8 @@ class AndroidRemote:
 
             if int(time.time()) - sc > 60: # long time no PING, still connected?
                 sc=int(time.time())
-                log.info('Are we still connected?')
-                p = remotemessage_pb2.RemoteMessage() # we send a PONG to see if connection is ok
-                p.remote_ping_response.val1 = 1
-                self.send_message(p)
+                log.info('Disconnected? We did not recieve a PING for 60 seconds.')
+                return
 
             if data == None: continue
 
@@ -351,11 +349,13 @@ class AndroidRemote:
                 log.debug('recv ' + str(buffer))
                 m = remotemessage_pb2.RemoteMessage()
                 m.ParseFromString(bytes(buffer[1:]))
+                log.debug(m)
 
                 if m.HasField('remote_ping_request'):
                     # less chatty PING/PONG
+                    # log.info(m)
                     cnt+=1;
-                    if cnt==10:
+                    if cnt>0:
                         log.info('PING')
                         log.info('PONG')
                         cnt=0
@@ -387,7 +387,7 @@ class AndroidRemote:
                     self.send_message(p)
 
 
-                if m.HasField('remote_start'):
+                if m.HasField('remote_start') and m.remote_start.started:
                     log.info('WE HAVE A CONNECTION')
                     connected=True
 
@@ -508,6 +508,8 @@ def remote():
         log.info(x)
 
     finally:
+        if not queue.empty(): log.info('empty queue')
+        while not queue.empty(): data = queue.get()
         ar.disconnect()
         ar = None
 
@@ -537,7 +539,8 @@ class myhandler(BaseHTTPRequestHandler):
                 self.server.t1 = None
                 self.server.t1 = threading.Thread(target=remote, args=())
                 self.server.t1.start()
-            if self.server.t1.is_alive(): queue.put(data)
+            if self.server.t1.is_alive():
+                queue.put(data)
         else:
             response = 'Wrong... ' + data
 
