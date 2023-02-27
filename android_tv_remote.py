@@ -333,8 +333,9 @@ class AndroidRemote:
                     data = self.ssl_sock.recv(1024)
 
 
-            if int(time.time()) - sc > 0: # long time no PING, still connected?
+            if int(time.time()) - sc > 60: # long time no PING, still connected?
                 sc=int(time.time())
+                log.info('Are we still connected?')
                 p = remotemessage_pb2.RemoteMessage() # we send a PONG to see if connection is ok
                 p.remote_ping_response.val1 = 1
                 self.send_message(p)
