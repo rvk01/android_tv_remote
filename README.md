@@ -39,8 +39,12 @@ View messages from the script (-f is follow output live)
     journalctl -u -f atvr
 
 ## Usage
+to be done
 
 ## Acknowledgments
 This project wouldn't have been possible without these awesome projects which reverse-engineered these protocols.
  - [Aymkdn](https://github.com/Aymkdn)'s wiki on the protocol [Remote Control (v2)](https://github.com/Aymkdn/assistant-freebox-cloud/wiki/Google-TV-(aka-Android-TV)-Remote-Control-(v2))
  - [louis49](https://github.com/louis49/androidtv-remote)'s [androidtv-remote](https://github.com/louis49/androidtv-remote) js implementation (especially for the v2 proto files)
+
+## Example of /index
+![](https://i.imgur.com/VpikHmW.png)
