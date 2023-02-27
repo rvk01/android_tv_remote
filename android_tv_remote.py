@@ -160,18 +160,20 @@ class AndroidRemote:
 
     def connect(self, pairing = False):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if self.host is None: raise Exception("Cannot connect to host")
         self.ssl_sock = ssl.wrap_socket(self.sock, keyfile=CERT_FILE, certfile=CERT_FILE, do_handshake_on_connect=True)
         self.ssl_sock.connect((self.host, 6467 if pairing else 6466))
         self.sock.close() # original not needed anymore
-        log.info('connecting to ' + self.host + (' 6467 pairing port' if pairing else ' 6466 remote port'))
+        log.info('Connecting to ' + self.host + (' 6467 pairing port' if pairing else ' 6466 remote port'))
 
     def disconnect(self):
         try: # only exception we handle here because it doesn't matter
             self.ssl_sock.shutdown(socket.SHUT_RDWR)
             self.ssl_sock.close()
         except Exception as x:
-            log.info(x)
-        log.info('disconnected')
+            #log.info(x)
+            return
+        log.info('Disconnected')
 
     def send_message(self, msg):
         m = bytearray(msg.SerializeToString())
@@ -318,7 +320,7 @@ class AndroidRemote:
 
 
             socket_list = [self.ssl_sock]
-            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], socket_list, 0)
+            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], socket_list, 0.1)
             data = None
 
             for sock in error_sockets:
@@ -485,7 +487,7 @@ def remote():
         if x.args[1].find("sslv3 alert") != -1:
             log.error("Certificate unknown, you need to re-pair. Remove client.pem and start on console.")
         else:
-            log.info(x)
+            log.info('ssl: ' + x)
     except Exception as x:
         log.info(x)
 
@@ -551,9 +553,10 @@ if __name__ == "__main__":
 
     with open(DEVICE_FILE, 'rt') as fp: usn=fp.read()
     log.info('We are using device "%s"' % usn)
-    hostname = socket.getfqdn()
+    #hostname = socket.getfqdn()
     log.info('');
-    log.info('You can access a TV Remote page on http://%s/index or /index0' % socket.gethostbyname_ex(hostname)[2][1]);
+    log.info('You can access a TV Remote page on http://%s/index or /index0' % '<ip_of_rpi>');
+    #log.info('You can access a TV Remote page on http://%s/index or /index0' % '<your_ip_of_rpi>'socket.gethostbyname_ex(hostname)[2][1]);
     log.info('');
     #SERVER_IP, MODELNAME = getdeviceip(usn) # TV could be off at restart
     #log.info('We found device "%s" on %s' % (MODELNAME, SERVER_IP))
