@@ -342,6 +342,8 @@ class AndroidRemote:
 
             if data == None: continue
 
+            sc=int(time.time())
+
             buffer = buffer + data
 
             if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
