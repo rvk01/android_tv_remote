@@ -311,16 +311,24 @@ class AndroidRemote:
               data = queue.get()
               if data=='STOP':
                   # test exception to see if thread can restart itself
+                  # self.disconnect()
                   raise Exception("Force (and test) exception to end remote thread")
-              self.dostring('KEYCODE_' + data)
+              else:
+                  self.dostring('KEYCODE_' + data)
 
 
             socket_list = [self.ssl_sock]
-            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], [], 0)
+            read_sockets, write_sockets, error_sockets = select.select(socket_list , [], socket_list, 0)
             data = None
+
+            for sock in error_sockets:
+                if sock == self.ssl_sock:
+                    raise Exception("Socket closed. Force (and test) exception to end remote thread")
+
             for sock in read_sockets:
                 if sock == self.ssl_sock:
                     data = self.ssl_sock.recv(1024)
+
             if data == None: continue
 
             buffer = buffer + data
