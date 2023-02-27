@@ -3,7 +3,7 @@
 ## icons for index
 
 https://fontawesome.com/v5/docs/web/style/size<br>
-https://icons8.com/icons
+or https://icons8.com/icons
 
 ### On request of
 
