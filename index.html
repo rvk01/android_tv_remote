@@ -45,8 +45,8 @@ body {
     border: 1px solid #2d63c8;
     border-radius: 8px;
     padding: 0px 0px;
-    width: 85px;
-    height: 85px;
+    width: 55px;
+    height: 55px;
     margin: 0px;
     cursor: pointer
 }
@@ -71,36 +71,57 @@ function doCommand(cmd) {
 </script>
 
 <div id=center>
-<button class="button1 fas fa-power-off fa-3x" type=button onclick='doCommand("POWER")'></button>
-<button class="button1 fas fa-3x" type=button onclick='doCommand("")'>&nbsp;</button>
-<button class="button1 fas fa-sign-out-alt fa-3x" type=button onclick='doCommand("stop")'></button>
+<button class="button1 fas fa-power-off fa-2x" type=button onclick='doCommand("POWER")'></button>
+<button class="button1 fas fa-home fa-2x" type=button onclick='doCommand("HOME")'></button>
+<button class="button1 fas fa-sign-out-alt fa-2x" type=button onclick='doCommand("stop")'></button>
 <br>
 <br>
-<button class="button1 fas fa-5x"             type=button onclick='doCommand("")'>&nbsp;</button>
-<button class="button1 fas fa-caret-up fa-5x" type=button onclick='doCommand("DPAD_UP")'></button>
-<button class="button1 fas fa-5x"             type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-3x"             type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-caret-up fa-3x" type=button onclick='doCommand("DPAD_UP")'></button>
+<button class="button1 fas fa-3x"             type=button onclick='doCommand("")'>&nbsp;</button>
 <br>
-<button class="button1 fas fa-caret-left fa-5x"  type=button onclick='doCommand("DPAD_LEFT")'></button>
-<button class="button1 fas fa-genderless fa-5x"  type=button onclick='doCommand("DPAD_CENTER")'></button>
-<button class="button1 fas fa-caret-right fa-5x" type=button onclick='doCommand("DPAD_RIGHT")'></button>
+<button class="button1 fas fa-caret-left fa-3x"  type=button onclick='doCommand("DPAD_LEFT")'></button>
+<button class="button1 fas fa-genderless fa-3x"  type=button onclick='doCommand("DPAD_CENTER")'></button>
+<button class="button1 fas fa-caret-right fa-3x" type=button onclick='doCommand("DPAD_RIGHT")'></button>
 <br>
-<button class="button1 fas fa-5x"               type=button onclick='doCommand("")'>&nbsp;</button>
-<button class="button1 fas fa-caret-down fa-5x" type=button onclick='doCommand("DPAD_DOWN")'></button>
-<button class="button1 fas fa-5x"               type=button onclick='doCommand("")'>&nbsp;</button>
-<br>
-<br>
-<button class="button1 fas fa-reply fa-3x" type=button onclick='doCommand("BACK")'></button>
-<button class="button1 fas fa-volume-mute fa-3x" type=button onclick='doCommand("MUTE")'></button>
-<button class="button1 fas fa-home fa-3x" type=button onclick='doCommand("HOME")'></button>
+<button class="button1 fas fa-3x"               type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-caret-down fa-3x" type=button onclick='doCommand("DPAD_DOWN")'></button>
+<button class="button1 fas fa-3x"               type=button onclick='doCommand("")'>&nbsp;</button>
 <br>
 <br>
-<button class="button1 fas fa-volume-up fa-3x" type=button onclick='doCommand("VOLUME_UP")'></button>
-<button class="button1 fas fa-caret-up fa-3x" type=button onclick='doCommand("CHANNEL_UP")'></button>
-<button class="button1 fas fa-sign-out-alt fa-3x" type=button onclick='doCommand("stop")'></button>
+<button class="button1 fas fa-reply fa-2x" type=button onclick='doCommand("BACK")'></button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("")'>&nbsp;</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("")'>&nbsp;</button>
 <br>
-<button class="button1 fas fa-volume-down fa-3x" type=button onclick='doCommand("VOLUME_DOWN")'></button>
-<button class="button1 fas fa-caret-down fa-3x" type=button onclick='doCommand("CHANNEL_DOWN")'></button>
-<button class="button1 fas fa-3x" type=button onclick='doCommand("")'>&nbsp;</button>
+<br>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("1")'>1</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("2")'>2</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("3")'>3</button>
+<br>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("4")'>4</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("5")'>5</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("6")'>6</button>
+<br>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("7")'>7</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("8")'>8</button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("9")'>9</button>
+<br>
+<button class="button1 fas fa-step-backward fa-2x" type=button onclick='doCommand("media_skip_backward")'></button>
+<button class="button1 fas fa-2x" type=button onclick='doCommand("0")'>0</button>
+<button class="button1 fas fa-step-forward fa-2x" type=button onclick='doCommand("media_skip_forward")'></button>
+<br>
+<button class="button1 fas fa-backward fa-2x" type=button onclick='doCommand("media_rewind")'></button>
+<button class="button1 fas fa-play-circle fa-2x" type=button onclick='doCommand("media_play_pause")'></button>
+<button class="button1 fas fa-forward fa-2x" type=button onclick='doCommand("media_fast_forward")'></button>
+<br>
+<button class="button1 fas fa-volume-up fa-2x" type=button onclick='doCommand("VOLUME_UP")'></button>
+<button class="button1 fas fa-stop fa-2x" type=button onclick='doCommand("media_stop")'></button>
+<button class="button1 fas fa-chevron-up fa-2x" type=button onclick='doCommand("CHANNEL_UP")'></button>
+<br>
+<button class="button1 fas fa-volume-down fa-2x" type=button onclick='doCommand("VOLUME_DOWN")'></button>
+<button class="button1 fas fa-volume-mute fa-2x" type=button onclick='doCommand("MUTE")'></button>
+<button class="button1 fas fa-chevron-down fa-2x" type=button onclick='doCommand("CHANNEL_DOWN")'></button>
 
 </div>
 
