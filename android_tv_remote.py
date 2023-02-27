@@ -375,7 +375,7 @@ class AndroidRemote:
                 del buffer[0:buffer[0] + 1] # remove message from buffer
 
 
-    def sendkey(self, KEY, dir):
+    def sendkey(self, KEY):
         p = remotemessage_pb2.RemoteMessage()
         p.remote_key_inject.key_code = KEY
         p.remote_key_inject.direction = remotemessage_pb2.START_LONG
