@@ -300,6 +300,7 @@ class AndroidRemote:
         buffer=bytearray()
         cnt=0
         connected=False
+        sc=int(time.time())
 
         while True:
 
@@ -331,6 +332,13 @@ class AndroidRemote:
                 if sock == self.ssl_sock:
                     data = self.ssl_sock.recv(1024)
 
+
+            if int(time.time()) - sc > 0: # long time no PING, still connected?
+                sc=int(time.time())
+                p = remotemessage_pb2.RemoteMessage() # we send a PONG to see if connection is ok
+                p.remote_ping_response.val1 = 1
+                self.send_message(p)
+
             if data == None: continue
 
             buffer = buffer + data
@@ -340,7 +348,6 @@ class AndroidRemote:
                 log.debug('recv ' + str(buffer))
                 m = remotemessage_pb2.RemoteMessage()
                 m.ParseFromString(bytes(buffer[1:]))
-                log.debug(m)
 
                 if m.HasField('remote_ping_request'):
                     # less chatty PING/PONG
@@ -402,8 +409,14 @@ class AndroidRemote:
     def dostring(self, cmd):
         if not enumvalid(cmd, remotemessage_pb2.RemoteKeyCode): return
         i=remotemessage_pb2.RemoteKeyCode.Value(cmd)
-        log.info('SendKey %s' % cmd)
-        self.sendkey(i)
+
+        if not i in [26, 233, 183, 184, 185, 186]: # power, teletext, color
+            log.info('SendKey %s' % cmd)
+            self.sendkey(i)
+        else:
+            log.info('SendKey2 %s' % cmd)
+            self.sendkey2(i)
+
 
 # ----------------------------------------------
 # check server.txt and if not exists choose a device
