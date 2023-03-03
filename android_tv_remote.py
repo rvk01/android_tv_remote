@@ -160,8 +160,8 @@ class AndroidRemote:
         self.host = host_address
 
     def connect(self, pairing = False):
+        if self.host is None: raise Exception("Host was not found (did not react on discover)")
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        if self.host is None: raise Exception("Cannot connect to host")
         self.ssl_sock = ssl.wrap_socket(self.sock, keyfile=CERT_FILE, certfile=CERT_FILE, do_handshake_on_connect=True)
         self.ssl_sock.connect((self.host, 6467 if pairing else 6466))
         self.sock.close() # original not needed anymore
@@ -570,7 +570,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
        if sys.argv[1]=='devices':
-           log.info('Searching for DIAL devices... (max 5 seconds)')
+           log.info('Searching for all DIAL devices... (max 5 seconds)')
            devices = discover(5.0,1)
            sys.exit()
 
