@@ -91,6 +91,7 @@ def discover(timeout=1.0, retries=1, want_usn=None):
                     if line.startswith('LOCATION: '): location = line.split(' ')[1].strip()
                     if line.startswith('USN: '): usn = line.split(' ')[1].strip()
                 usn = usn.split(':')[1].strip()
+                log.info('found a device on %s (%s)' % (location, usn))
                 if not location is None and (want_usn is None or want_usn==usn):
                     locations.append((location,usn))
                     if want_usn==usn: break
@@ -566,6 +567,12 @@ def server():
 #
 # ----------------------------------------------
 if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+       if sys.argv[1]=='devices':
+           log.info('Searching for DIAL devices... (max 5 seconds)')
+           devices = discover(5.0,1)
+           sys.exit()
 
     check_device_and_choose()
     check_certificate_and_pair()
