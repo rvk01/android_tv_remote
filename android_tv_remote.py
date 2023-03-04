@@ -83,6 +83,7 @@ def discover(timeout=1.0, retries=1, want_usn=None):
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
         sock.sendto(message.encode('utf-8'), group)
         while True:
+            log.info('Searching...')
             try:
                 response = sock.recv(2048).decode('utf-8')
                 location=None
@@ -111,7 +112,7 @@ def enumvalid(str, enum):
         return None
 
 def getdeviceip(want_usn):
-    devices = discover(5.0,1,want_usn)
+    devices = discover(5.0,3,want_usn)
     if len(devices) == 0: return (None, None)
     for location, usn in devices:
         o = urllib.parse.urlsplit(location)
@@ -429,7 +430,7 @@ def check_device_and_choose():
     if not os.path.isfile(DEVICE_FILE):
         print("Android TV Remote - Choosing device - (collecting...)")
         print()
-        devices = discover(5.0,1)
+        devices = discover(5.0,3)
         #for device, usn in devices:
         idx=0
         devices=list(devices)
@@ -570,8 +571,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
        if sys.argv[1]=='devices':
-           log.info('Searching for all DIAL devices... (max 5 seconds)')
-           devices = discover(5.0,1)
+           log.info('Searching for all DIAL devices... (max 3x 5 seconds)')
+           devices = discover(5.0,3)
            sys.exit()
 
     check_device_and_choose()
