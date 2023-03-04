@@ -71,6 +71,7 @@ log.setLevel(logging.INFO)
 
 def discover(timeout=1.0, retries=1, want_usn=None):
     locations = []
+    usn=None
     group = ('239.255.255.250', 1900)
     service = 'urn:dial-multiscreen-org:service:dial:1'
     #service = 'ssdp:all'
@@ -96,8 +97,12 @@ def discover(timeout=1.0, retries=1, want_usn=None):
                 if not location is None and (want_usn is None or want_usn==usn):
                     locations.append((location,usn))
                     if want_usn==usn: break
+
             except socket.timeout:
                 break
+
+        if want_usn==usn: break # also break out of the retries
+
     locations = set({i: j for i,j in reversed(locations)}.items())
     return  locations
 
