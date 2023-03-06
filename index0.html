@@ -88,6 +88,9 @@ function doCommand(cmd) {
 <span id="spanId">X</span>
 </div>
 
+<input class="" id=app type=text>
+<button class=button2 type=button onclick='doCommand("APP_" + document.getElementById("app").value)'>Send app</button><br>
+
 <h1>All buttons</h1>
 
 <script>
@@ -383,6 +386,23 @@ const keys = new Array(
 'THUMBS_UP',
 'THUMBS_DOWN',
 'PROFILE_SWITCH',
+'',
+'VIDEO_APP_1',
+'VIDEO_APP_2',
+'VIDEO_APP_3',
+'VIDEO_APP_4',
+'VIDEO_APP_5',
+'VIDEO_APP_6',
+'VIDEO_APP_7',
+'VIDEO_APP_8',
+'FEATURED_APP_1',
+'FEATURED_APP_2',
+'FEATURED_APP_3',
+'FEATURED_APP_4',
+'DEMO_APP_1',
+'DEMO_APP_2',
+'DEMO_APP_3',
+'DEMO_APP_4'
 );
 
 function myFunction(value) {
@@ -395,9 +415,6 @@ keys.forEach(myFunction);
 document.write('</span>');
 
 </script>
-
-<a href=/index>/index</a><br>
-<a href=/index2>/index2</a>
 
 </body>
 </html>

@@ -68,6 +68,9 @@ INDEX_FILE3=dir_path + "/index3.html"
 log = logging.getLogger("atvr")
 logging.basicConfig()
 log.setLevel(logging.INFO)
+if len(sys.argv) > 1:
+    if sys.argv[1]=='debug':
+        log.setLevel(logging.DEBUG)
 
 def discover(timeout=1.0, retries=1, want_usn=None):
     locations = []
@@ -210,7 +213,7 @@ class AndroidRemote:
                 log.debug('recv ' + str(buffer))
                 m = pairingmessage_pb2.PairingMessage()
                 m.ParseFromString(bytes(buffer[1:]))
-                log.debug(m)
+                log.info(m)
 
                 if m.HasField('pairing_request_ack'):
                     log.info('receive pairing response')
@@ -323,9 +326,14 @@ class AndroidRemote:
                   # test exception to see if thread can restart itself
                   # self.disconnect()
                   raise Exception("Force (and test) exception to end remote thread")
-              else:
+              elif data=='DEMO_APP_x': # define your own
+                  self.startapp('https://www.ziggogo.tv/')
+              elif enumvalid('KEYCODE_'+data, remotemessage_pb2.RemoteKeyCode):
                   self.dostring('KEYCODE_' + data)
-
+              elif data[:4] == 'APP_':
+                  self.startapp(data[4:].lower()) # else send as app
+              else:
+                  pass
 
             socket_list = [self.ssl_sock]
             read_sockets, write_sockets, error_sockets = select.select(socket_list , [], socket_list, 0.1)
@@ -353,16 +361,18 @@ class AndroidRemote:
 
             if (len(buffer) > 1) and (buffer[0] <= len(buffer) - 1):
 
-                log.debug('recv ' + str(buffer))
+                #log.debug('recv ' + str(buffer))
                 m = remotemessage_pb2.RemoteMessage()
                 m.ParseFromString(bytes(buffer[1:]))
-                log.debug(m)
+
+                if not m.HasField('remote_ping_request'):
+                    log.debug(m)
 
                 if m.HasField('remote_ping_request'):
                     # less chatty PING/PONG
                     # log.info(m)
                     cnt+=1;
-                    if cnt>0:
+                    if cnt>4:
                         log.info('PING')
                         log.info('PONG')
                         cnt=0
@@ -372,8 +382,9 @@ class AndroidRemote:
 
                 if m.HasField('remote_configure'):
                     log.info('receive config')
-                    log.info('sending config');
+                    log.info('connected ' + str(m.remote_configure.device_info.model))
 
+                    log.info('sending config')
                     p = remotemessage_pb2.RemoteMessage()
                     p.remote_configure.code1 = 622
                     p.remote_configure.device_info.model = 'atvr'
@@ -387,8 +398,8 @@ class AndroidRemote:
 
                 if m.HasField('remote_set_active'):
                     log.info('receive set active')
-                    log.info('sending set active');
 
+                    log.info('sending set active')
                     p = remotemessage_pb2.RemoteMessage()
                     p.remote_set_active.active = 622
                     self.send_message(p)
@@ -397,6 +408,12 @@ class AndroidRemote:
                 if m.HasField('remote_start') and m.remote_start.started:
                     log.info('WE HAVE A CONNECTION')
                     connected=True
+
+                if m.HasField('remote_ime_key_inject'):
+                    log.info('ACTIVE APP ' + m.remote_ime_key_inject.app_info.app_package)
+
+                if m.HasField('remote_set_volume_level'):
+                    log.info('Volume received')
 
                 log.debug('rmov ' + str(buffer))
                 del buffer[0:buffer[0] + 1] # remove message from buffer
@@ -414,6 +431,12 @@ class AndroidRemote:
         p = remotemessage_pb2.RemoteMessage()
         p.remote_key_inject.key_code = KEY
         p.remote_key_inject.direction = remotemessage_pb2.SHORT
+        self.send_message(p)
+
+    def startapp(self, app):
+        log.info('Start app %s' % app)
+        p = remotemessage_pb2.RemoteMessage()
+        p.remote_app_link_launch_request.app_link = app
         self.send_message(p)
 
     def dostring(self, cmd):
@@ -540,16 +563,13 @@ class myhandler(BaseHTTPRequestHandler):
         data=self.path[1:].upper() # /Volume_up remove slash
         response = 'Ok... ' + data
 
-        if not enumvalid('KEYCODE_'+data, remotemessage_pb2.RemoteKeyCode) is None or data=='STOP':
-            if not self.server.t1.is_alive() and not data=='STOP':
-                log.info('Remote was stopped and we now have a code (%s), so restarting REMOTE thread' % data)
-                self.server.t1 = None
-                self.server.t1 = threading.Thread(target=remote, args=())
-                self.server.t1.start()
-            if self.server.t1.is_alive():
-                queue.put(data)
-        else:
-            response = 'Wrong... ' + data
+        if not self.server.t1.is_alive() and not data=='STOP':
+            log.info('Remote was stopped and we now have a code (%s), so restarting REMOTE thread' % data)
+            self.server.t1 = None
+            self.server.t1 = threading.Thread(target=remote, args=())
+            self.server.t1.start()
+        if self.server.t1.is_alive():
+            queue.put(data)
 
         if os.path.isfile(dir_path+'/'+data.lower()+'.html'):
             with open(dir_path+'/'+data.lower()+'.html', 'rt') as fp: response=fp.read()
